@@ -147,7 +147,7 @@ Object.assign(C.acciones, {
     const calidad = ya ? 'Opción ' + (ya + 1) : '';
     T.put('tarifas', T.tarifaId(P.modeloId, d.v, calidad), { modeloId:P.modeloId, problema:d.v, calidad, precio:null, tiempo:null, garantiaDias:null, refaccionId:null });
   },
-  'tar-quitar'(d){ if (confirm('¿Quitar este precio?')) T.put('tarifas', d.v, null); },
+  'tar-quitar'(d){ T.confirmar('¿Quitar este precio? El sitio volverá a decir “por confirmar” para esta opción.', () => T.put('tarifas', d.v, null), { ok:'Quitar precio', peligro:true }); },
   'prod-nuevo'(){ U.prod = Object.assign(T.clone(PROD0), { open:!(U.prod.open && !U.prod.id) }); T.scheduleRender(); },
   'prod-cerrar'(){ U.prod = T.clone(PROD0); T.scheduleRender(); },
   'prod-editar'(d){ const p = S.productos[d.v], e = T.ex(d.v), k = T.costo(d.v); U.prod = { open:true, id:d.v, nombre:p.nombre, categoria:p.categoria, compat:p.compat || '', marca:p.marca || '', precio:p.precio == null ? '' : p.precio, sku:p.sku || '', min:e.min == null ? '' : e.min, costo:k == null ? '' : k, oculto:!!p.oculto }; T.scheduleRender(); window.scrollTo(0, 0); },

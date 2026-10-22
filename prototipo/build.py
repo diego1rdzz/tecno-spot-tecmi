@@ -48,9 +48,11 @@ def json_html(datos):
     return json.dumps(datos, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
 
-def fragmento(titulo, herramientas, enlaces, inicial, datos, portada=False, supa=None):
+def fragmento(titulo, herramientas, enlaces, inicial, datos, portada=False, supa=None, artifact=False):
     css = leer("comun/base.css") + "".join(leer(f"{h}/{h}.css") for h in herramientas)
     guion = "window.TS_LINKS = %s;" % json.dumps(enlaces)
+    if artifact:
+        guion += "\nwindow.TS_ARTIFACT = true;"
     if supa:
         guion += "\nwindow.TS_SUPABASE = %s;" % json.dumps({"url": supa["url"], "key": supa["key"]})
     partes = [leer("comun/nucleo.js")]
@@ -103,6 +105,6 @@ for nombre, (titulo, _) in sueltos.items():
 if len(sys.argv) > 1:
     destino = pathlib.Path(sys.argv[1]) / "sistema-tecno-spot.html"
     destino.write_text(fragmento("Sistema Tecno-Spot", ["sitio", "portal", "consola"],
-                                 {"inicio": "#inicio", "portal": "#portal", "sitio": "#sitio"}, "inicio", DEMO, portada=True),
+                                 {"inicio": "#inicio", "portal": "#portal", "sitio": "#sitio"}, "inicio", DEMO, portada=True, artifact=True),
                        encoding="utf-8")
     print("escrito", destino)

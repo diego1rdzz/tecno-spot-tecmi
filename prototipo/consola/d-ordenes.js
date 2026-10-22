@@ -100,7 +100,7 @@ C.formularios['nueva-orden'] = () => {
   });
   if (N.citaId) C.cerrarCita(N.citaId, 'atendida', { ordenId:r.id, clienteId:cid }, 'Equipo recibido · orden ' + r.o.folio);
   C.abrirOrden(r.id); U.drawer = { kind:'orden', id:r.id };
-  T.toast('Orden ' + r.o.folio + ' creada. Imprime la hoja de recepción para que el cliente la firme.');
+  T.toast('Orden ' + r.o.folio + ' creada.' + (T.puedeImprimir ? ' Imprime la hoja de recepción para que el cliente la firme.' : ''));
 };
 
 /* ---------- panel de una orden ---------- */
@@ -196,7 +196,7 @@ C.drawers.orden = id => {
     + '<dt>Al recibir</dt><dd>' + (malos.length ? malos.map(([k, t]) => chip(r.checklist[k] === 'no' ? 'crit' : 'muted', t + ': ' + T.CHECK_VALS[r.checklist[k]])).join(' ') : 'Todo funcionaba al recibir') + '</dd>'
     + '<dt>Accesorios</dt><dd>' + esc((r.accesorios || []).join(', ') || 'Ninguno') + '</dd>' + (r.notas ? '<dt>Observaciones</dt><dd>' + esc(r.notas) + '</dd>' : '')
     + '<dt>Recibió</dt><dd>' + esc(r.por || '—') + ' · ' + T.fmtD(o.creada) + (o.modalidad === 'domicilio' ? ' · recolección a domicilio' : '') + '</dd></dl>'
-    + '<div class="row"><button class="btn sm" type="button" data-act="os-print" data-v="' + esc(id) + '" data-t="recepcion">Imprimir hoja de recepción</button>' + (o.entrega ? '<button class="btn sm" type="button" data-act="os-print" data-v="' + esc(id) + '" data-t="entrega">Imprimir comprobante de entrega</button>' : '') + '</div></section>'
+    + (T.puedeImprimir ? '<div class="row"><button class="btn sm" type="button" data-act="os-print" data-v="' + esc(id) + '" data-t="recepcion">Imprimir hoja de recepción</button>' + (o.entrega ? '<button class="btn sm" type="button" data-act="os-print" data-v="' + esc(id) + '" data-t="entrega">Imprimir comprobante de entrega</button>' : '') + '</div>' : '') + '</section>'
     + '<section class="stack tight"><h3>Historial</h3><div class="stack tight">' + C.area('od.nota', 'od-nota', 'Agregar nota', X.nota) + '<div class="row">' + C.chk('od.publica', 'El cliente la ve al consultar su folio', X.publica) + '<button class="btn sm" type="button" data-act="os-nota" data-v="' + esc(id) + '">Guardar nota</button></div></div>'
     + '<ul class="log">' + (o.historial || []).slice().reverse().map(h => '<li><span class="h">' + T.fmtD(h.fecha) + ' ' + esc(h.hora || '') + ' · ' + esc(h.autor || '') + (h.publico ? ' · lo ve el cliente' : ' · interna') + '</span>' + esc(h.nota) + '</li>').join('') + '</ul></section>');
 };
@@ -229,7 +229,7 @@ Object.assign(C.acciones, {
     editar(d.v, o => { err = T.descontarOrden(o); if (err) return false; o.estado = 'listo'; T.hist(o, 'Reparación terminada · listo para entregar', true); });
     if (err) T.toast(err, 'crit'); else T.toast('Listo para entregar. Avísale al cliente por WhatsApp.');
   },
-  'os-reabrir'(d){ if (!confirm('Reabrir el presupuesto libera las refacciones apartadas y pide una nueva autorización. ¿Continuar?')) return; editar(d.v, o => { T.liberarOrden(o, 'Presupuesto reabierto'); o.autorizacion = { estado:'pendiente' }; o.estado = 'diagnostico'; T.hist(o, 'Presupuesto reabierto: necesita nueva autorización', true); }); },
+  'os-reabrir'(d){ T.confirmar('Reabrir el presupuesto libera las refacciones apartadas y pide una nueva autorización del cliente.', () => editar(d.v, o => { T.liberarOrden(o, 'Presupuesto reabierto'); o.autorizacion = { estado:'pendiente' }; o.estado = 'diagnostico'; T.hist(o, 'Presupuesto reabierto: necesita nueva autorización', true); }), { ok:'Reabrir presupuesto' }); },
   'os-linea'(d){
     const L = U.od.linea; let l = null;
     if (L.tipo === 'tarifa'){ if (!L.tarifaId) return T.toast('Elige un servicio.', 'warn'); l = C.lineaTarifa(L.tarifaId); }

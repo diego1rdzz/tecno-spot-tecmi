@@ -42,7 +42,10 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 16px/1.5 var(--sans);}
+/* La franja de la muesca del teléfono, con el color de la barra. */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bar)}
 h1,h2,h3,h4{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15;letter-spacing:-.01em}
 p{margin:0}
 a{color:var(--accent)}
@@ -60,7 +63,7 @@ button{font:inherit}
 .ico{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
 /* Barra superior */
-.top{position:sticky;top:0;z-index:20;background:var(--bar);color:var(--bar-ink);padding-top:env(safe-area-inset-top,0px)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bar);color:var(--bar-ink)}
 .top-in{max-width:1240px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
 .brand .tool{font:600 13px/1.1 var(--sans);color:var(--bar-muted);border-left:1px solid var(--bar-muted);padding-left:12px}
@@ -177,7 +180,7 @@ table.t tfoot td{font-weight:700;background:var(--sunk)}
 .stagebar{display:flex;gap:4px;flex-wrap:wrap}
 .stagebar span{font:600 12.5px/1 var(--sans);padding:6px 9px;border-radius:6px;background:var(--sunk);color:var(--muted)}
 .stagebar span.on{background:var(--accent);color:var(--accent-ink)}
-.stagebar span.lost{background:var(--crit);color:#fff}
+.stagebar span.lost{background:var(--crit);color:var(--ground)}
 
 /* Acceso */
 .login{max-width:440px;margin:40px auto;display:grid;gap:16px;text-align:left}
@@ -190,8 +193,12 @@ table.t tfoot td{font-weight:700;background:var(--sunk)}
 .drawer-head h2{font-size:21px}
 .drawer-body{overflow:auto;padding:18px;display:grid;gap:18px;align-content:start;flex:1}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--ground);padding:11px 16px;border-radius:8px;font:600 15px/1.3 var(--sans);max-width:min(560px,calc(100% - 32px));box-shadow:0 8px 24px rgba(0,0,0,.25)}
-.toast.crit{background:var(--crit);color:#fff}
-.toast.warn{background:var(--warn);color:#fff}
+.toast.crit{background:var(--crit);color:var(--ground)}
+.toast.warn{background:var(--warn);color:var(--ground)}
+/* Diálogo de confirmación */
+.dlg-scrim{z-index:50}
+.dlg{position:fixed;z-index:51;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,calc(100% - 32px));background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:18px;display:grid;gap:14px;box-shadow:0 18px 50px rgba(0,0,0,.28)}
+.dlg p{font:600 16.5px/1.4 var(--sans)}
 .loading{padding:80px 0;text-align:center;color:var(--muted)}
 .foot-sys{max-width:1240px;margin:0 auto;padding:0 16px 28px;font-size:13px;color:var(--muted)}
 
@@ -396,7 +403,9 @@ const CFG0 = {
 };
 
 /* Estado de pantalla compartido; cada herramienta agrega el suyo. */
-const U = { app:'', rol:'direccion', persona:'', drawer:null, toast:null };
+const U = { app:'', rol:'direccion', persona:'', drawer:null, toast:null, dlg:null };
+/* En la demostración publicada como artifact no se puede imprimir ni descargar archivos. */
+const EN_ARTIFACT = !!window.TS_ARTIFACT;
 
 /* ---------- utilidades ---------- */
 const $ = s => document.querySelector(s);
@@ -1003,7 +1012,7 @@ function render(){
   else if (Store.mode === 'supabase' && !accesoOk()) body = app.barra() + '<main>' + vAcceso() + '</main>';
   else if (!Store.loaded.config) body = app.barra() + '<main><div class="loading">Cargando…</div></main>';
   else body = app.vista();
-  $('#app').innerHTML = body + (U.toast ? '<div class="toast ' + (U.toast.k || '') + '" role="status">' + esc(U.toast.t) + '</div>' : '');
+  $('#app').innerHTML = body + vDialogo() + (U.toast ? '<div class="toast ' + (U.toast.k || '') + '" role="status">' + esc(U.toast.t) + '</div>' : '');
   if (fid){ const el = document.getElementById(fid); if (el){ try { el.focus({ preventScroll:true }); if (s0 != null && el.setSelectionRange) el.setSelectionRange(s0, s1); } catch (e) {} } }
   /* El panel lateral conserva su scroll solo si sigue mostrando lo mismo. */
   const dk = U.drawer ? U.drawer.kind + ':' + (U.drawer.id || '') : '';
@@ -1011,6 +1020,17 @@ function render(){
   ultimoDrawer = dk;
   if (app.despues) app.despues();
 }
+/* Confirmaciones dentro de la página: el visor de artifacts no muestra confirm() ni prompt(). */
+let dlgFn = null;
+function confirmar(texto, alAceptar, op){ U.dlg = Object.assign({ texto, ok:'Sí, continuar', no:'Cancelar', campo:null, valor:'', peligro:false }, op || {}); dlgFn = alAceptar; scheduleRender(); }
+function vDialogo(){
+  const d = U.dlg; if (!d) return '';
+  return '<div class="scrim dlg-scrim" data-act="ts-dlg-no"></div><div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlg-t"><p id="dlg-t">' + esc(d.texto) + '</p>'
+    + (d.campo ? '<label class="f" for="dlg-v">' + esc(d.campo) + '<input id="dlg-v" data-bind="dlg.valor" value="' + esc(d.valor) + '" autocomplete="off"></label>' : '')
+    + '<div class="row"><button class="btn ' + (d.peligro ? 'danger' : 'primary') + '" type="button" data-act="ts-dlg-ok">' + esc(d.ok) + '</button><button class="btn quiet" type="button" data-act="ts-dlg-no">' + esc(d.no) + '</button></div></div>';
+}
+TS_ACT['ts-dlg-ok'] = () => { const f = dlgFn, v = U.dlg ? U.dlg.valor : ''; U.dlg = null; dlgFn = null; scheduleRender(); if (f) f(v); };
+TS_ACT['ts-dlg-no'] = () => { U.dlg = null; dlgFn = null; scheduleRender(); };
 let toastTimer = null;
 function toast(t, k){ U.toast = { t, k }; scheduleRender(); clearTimeout(toastTimer); toastTimer = setTimeout(() => { U.toast = null; scheduleRender(); }, 4600); }
 /* Hojas imprimibles (recepción, entrega, ticket): se arman aparte y se imprimen sin la interfaz. */
@@ -1053,7 +1073,7 @@ document.addEventListener('submit', e => {
   e.preventDefault(); if (TS_FORM[f.dataset.form]) return TS_FORM[f.dataset.form](f);
   const app = actual(); const fn = app && app.formularios && app.formularios[f.dataset.form]; if (fn) fn(f);
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && U.drawer){ U.drawer = null; scheduleRender(); } });
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (U.dlg){ U.dlg = null; dlgFn = null; scheduleRender(); } else if (U.drawer){ U.drawer = null; scheduleRender(); } });
 
 async function start(inicial){
   const porHash = () => { const h = (location.hash || '').slice(1); return APPS[h] ? h : null; };
@@ -1083,7 +1103,8 @@ window.TS = {
   totalOrden, pagadoOrden, saldoOrden, ordenAbierta, equipoTxt, hist, crearOrden, ordenEdit, autorizar, apartarOrden, liberarOrden, descontarOrden, entregar, reclamoGarantia,
   garantias, registrarVenta, compraVerificada, aceptarCompra, caja,
   consultar, autorizarFuera, cancelarFuera, vistaCuenta, miCuenta, lineaTiempo, icsCita, logo, icono,
-  registrar, scheduleRender, toast, imprimir, barra, start, guardarPerfil, esInterno, rpc
+  registrar, scheduleRender, toast, imprimir, confirmar, barra, start, guardarPerfil, esInterno, rpc,
+  puedeImprimir:!EN_ARTIFACT, puedeDescargar:!EN_ARTIFACT
 };
 })();
 
@@ -1166,7 +1187,7 @@ function vista(){
   return barra() + '<div class="consola"><nav class="lado" aria-label="Módulos">' + nav
     + (T.Store.mode === 'local' ? '<button class="btn sm quiet reset" type="button" data-act="reset-demo">Restablecer demostración</button>' : '') + '</nav>'
     + '<main class="contenido"><div class="stack"><div class="console-head"><div><div class="eyebrow">' + esc(mod[2]) + '</div><h1>' + esc(mod[1]) + '</h1></div>' + (C.cabeza[U.tab] ? C.cabeza[U.tab]() : '') + '</div>'
-    + (supa() ? '' : '<p class="note">Prototipo: el rol se simula arriba a la derecha. Con Supabase lo decide la base de datos, y costos y utilidad solo llegan a dirección y administración.</p>')
+    + (supa() ? '' : '<p class="note">Prototipo: el rol se simula con «Ver como». Con Supabase lo decide la base de datos, y costos y utilidad solo llegan a dirección y administración.</p>')
     + C.vistas[U.tab]() + '</div></main></div>' + vDrawer();
 }
 C.cabeza = {};
@@ -1183,7 +1204,7 @@ C.vista = vista;
 C.barra = barra;
 C.acciones.tab = d => { U.tab = d.v; U.drawer = null; T.scheduleRender(); window.scrollTo(0, 0); };
 C.acciones.cerrar = () => { U.drawer = null; T.scheduleRender(); };
-C.acciones['reset-demo'] = () => { if (confirm('¿Borrar los cambios de este navegador y volver a los datos de demostración?')){ T.resetDemo(); U.drawer = null; T.toast('Demostración restablecida.'); } };
+C.acciones['reset-demo'] = () => T.confirmar('¿Borrar los cambios de este navegador y volver a los datos de demostración?', () => { T.resetDemo(); U.drawer = null; T.toast('Demostración restablecida.'); }, { ok:'Restablecer', peligro:true });
 C.estado = { tab:'hoy' };
 })();
 
@@ -1283,10 +1304,11 @@ Object.assign(C.acciones, {
   'ct-atender'(d){ C.cerrarCita(d.v, 'atendiendo', { atendio:T.quien() }, 'En atención con ' + T.quien()); },
   'ct-noasistio'(d){ C.cerrarCita(d.v, 'noasistio', {}, 'No asistió'); },
   'ct-resuelto'(d){
-    const nota = prompt('¿Cómo se resolvió? (por ejemplo: duda de garantía aclarada)', '');
-    if (nota === null) return;
-    C.cerrarCita(d.v, 'atendida', { cierre:{ resultado:'resuelta', nota:nota.trim() || 'Resuelto sin orden', fecha:T.hoyISO() } }, 'Atendida: ' + (nota.trim() || 'resuelto sin orden'));
-    const cid = C.clienteDeCita(d.v); if (cid && nota.trim()) T.bitacora(cid, { tipo:'Cita', nota:nota.trim() });
+    T.confirmar('¿Cómo se resolvió esta cita?', nota => {
+      nota = (nota || '').trim();
+      C.cerrarCita(d.v, 'atendida', { cierre:{ resultado:'resuelta', nota:nota || 'Resuelto sin orden', fecha:T.hoyISO() } }, 'Atendida: ' + (nota || 'resuelto sin orden'));
+      const cid = C.clienteDeCita(d.v); if (cid && nota) T.bitacora(cid, { tipo:'Cita', nota });
+    }, { campo:'Nota (por ejemplo: duda de garantía aclarada)', ok:'Marcar como atendida' });
   },
   'ct-recibir'(d){ C.nuevaOrden({ citaId:d.v }); },
   'ct-entregar'(d){
@@ -1516,7 +1538,7 @@ C.formularios['nueva-orden'] = () => {
   });
   if (N.citaId) C.cerrarCita(N.citaId, 'atendida', { ordenId:r.id, clienteId:cid }, 'Equipo recibido · orden ' + r.o.folio);
   C.abrirOrden(r.id); U.drawer = { kind:'orden', id:r.id };
-  T.toast('Orden ' + r.o.folio + ' creada. Imprime la hoja de recepción para que el cliente la firme.');
+  T.toast('Orden ' + r.o.folio + ' creada.' + (T.puedeImprimir ? ' Imprime la hoja de recepción para que el cliente la firme.' : ''));
 };
 
 /* ---------- panel de una orden ---------- */
@@ -1612,7 +1634,7 @@ C.drawers.orden = id => {
     + '<dt>Al recibir</dt><dd>' + (malos.length ? malos.map(([k, t]) => chip(r.checklist[k] === 'no' ? 'crit' : 'muted', t + ': ' + T.CHECK_VALS[r.checklist[k]])).join(' ') : 'Todo funcionaba al recibir') + '</dd>'
     + '<dt>Accesorios</dt><dd>' + esc((r.accesorios || []).join(', ') || 'Ninguno') + '</dd>' + (r.notas ? '<dt>Observaciones</dt><dd>' + esc(r.notas) + '</dd>' : '')
     + '<dt>Recibió</dt><dd>' + esc(r.por || '—') + ' · ' + T.fmtD(o.creada) + (o.modalidad === 'domicilio' ? ' · recolección a domicilio' : '') + '</dd></dl>'
-    + '<div class="row"><button class="btn sm" type="button" data-act="os-print" data-v="' + esc(id) + '" data-t="recepcion">Imprimir hoja de recepción</button>' + (o.entrega ? '<button class="btn sm" type="button" data-act="os-print" data-v="' + esc(id) + '" data-t="entrega">Imprimir comprobante de entrega</button>' : '') + '</div></section>'
+    + (T.puedeImprimir ? '<div class="row"><button class="btn sm" type="button" data-act="os-print" data-v="' + esc(id) + '" data-t="recepcion">Imprimir hoja de recepción</button>' + (o.entrega ? '<button class="btn sm" type="button" data-act="os-print" data-v="' + esc(id) + '" data-t="entrega">Imprimir comprobante de entrega</button>' : '') + '</div>' : '') + '</section>'
     + '<section class="stack tight"><h3>Historial</h3><div class="stack tight">' + C.area('od.nota', 'od-nota', 'Agregar nota', X.nota) + '<div class="row">' + C.chk('od.publica', 'El cliente la ve al consultar su folio', X.publica) + '<button class="btn sm" type="button" data-act="os-nota" data-v="' + esc(id) + '">Guardar nota</button></div></div>'
     + '<ul class="log">' + (o.historial || []).slice().reverse().map(h => '<li><span class="h">' + T.fmtD(h.fecha) + ' ' + esc(h.hora || '') + ' · ' + esc(h.autor || '') + (h.publico ? ' · lo ve el cliente' : ' · interna') + '</span>' + esc(h.nota) + '</li>').join('') + '</ul></section>');
 };
@@ -1645,7 +1667,7 @@ Object.assign(C.acciones, {
     editar(d.v, o => { err = T.descontarOrden(o); if (err) return false; o.estado = 'listo'; T.hist(o, 'Reparación terminada · listo para entregar', true); });
     if (err) T.toast(err, 'crit'); else T.toast('Listo para entregar. Avísale al cliente por WhatsApp.');
   },
-  'os-reabrir'(d){ if (!confirm('Reabrir el presupuesto libera las refacciones apartadas y pide una nueva autorización. ¿Continuar?')) return; editar(d.v, o => { T.liberarOrden(o, 'Presupuesto reabierto'); o.autorizacion = { estado:'pendiente' }; o.estado = 'diagnostico'; T.hist(o, 'Presupuesto reabierto: necesita nueva autorización', true); }); },
+  'os-reabrir'(d){ T.confirmar('Reabrir el presupuesto libera las refacciones apartadas y pide una nueva autorización del cliente.', () => editar(d.v, o => { T.liberarOrden(o, 'Presupuesto reabierto'); o.autorizacion = { estado:'pendiente' }; o.estado = 'diagnostico'; T.hist(o, 'Presupuesto reabierto: necesita nueva autorización', true); }), { ok:'Reabrir presupuesto' }); },
   'os-linea'(d){
     const L = U.od.linea; let l = null;
     if (L.tipo === 'tarifa'){ if (!L.tarifaId) return T.toast('Elige un servicio.', 'warn'); l = C.lineaTarifa(L.tarifaId); }
@@ -1762,7 +1784,7 @@ function vVentas(){
     + '<button class="btn primary lg" type="button" data-act="pos-cobrar"' + (P.lineas.length ? '' : ' disabled') + '>Cobrar ' + T.fmtMoney(cobrar) + '</button></section></div>'
     + '<section class="stack tight"><h2>Ventas de los últimos 7 días</h2><div class="tbl"><table class="t"><thead><tr><th>Folio</th><th>Fecha</th><th>Cliente</th><th>Productos</th><th class="num">Total</th>' + (vc ? '<th class="num">Utilidad</th>' : '') + '<th></th></tr></thead><tbody>'
     + (ventasHoy.map(([id, v]) => { const uu = T.utilidad(v.lineas); return '<tr><td class="mono">' + esc(v.folio) + '</td><td>' + T.fmtD(v.fecha) + ' ' + esc(v.hora || '') + '</td><td>' + (v.clienteId ? C.linkCliente(v.clienteId) : '<span class="muted">Mostrador</span>') + '</td><td>' + esc(v.lineas.map(l => l.desc).join(', ')) + '</td><td class="num">' + T.fmtMoney(v.total) + (v.credito ? '<div class="small muted">toma ' + T.fmtMoney(v.credito) + '</div>' : '') + '</td>'
-      + (vc ? '<td class="num">' + (uu.pct != null ? T.pctTxt(uu.pct) : '—') + '</td>' : '') + '<td><button class="btn sm quiet" type="button" data-act="pos-ticket" data-v="' + esc(id) + '">Ticket</button></td></tr>'; }).join('') || '<tr><td colspan="7" class="muted">Sin ventas.</td></tr>')
+      + (vc ? '<td class="num">' + (uu.pct != null ? T.pctTxt(uu.pct) : '—') + '</td>' : '') + '<td>' + (T.puedeImprimir ? '<button class="btn sm quiet" type="button" data-act="pos-ticket" data-v="' + esc(id) + '">Ticket</button>' : '') + '</td></tr>'; }).join('') || '<tr><td colspan="7" class="muted">Sin ventas.</td></tr>')
     + '</tbody></table></div></section>';
 }
 C.vistas.ventas = vVentas;
@@ -1798,7 +1820,7 @@ Object.assign(C.acciones, {
     if (P.citaId) C.cerrarCita(P.citaId, 'atendida', { ventaId:r.id, clienteId:cid || null }, 'Venta ' + r.v.folio);
     U.pos = T.clone(POS0);
     T.toast('Venta ' + r.v.folio + (r.v.cambio ? ' · cambio ' + T.fmtMoney(r.v.cambio) : '') + '.');
-    if (confirm('¿Imprimir ticket?')) C.imprimirVenta(r.id);
+    if (T.puedeImprimir) T.confirmar('Venta ' + r.v.folio + ' registrada. ¿Imprimir el ticket?', () => C.imprimirVenta(r.id), { ok:'Imprimir ticket', no:'No' });
   }
 });
 C.cambios.push(t => {
@@ -2136,7 +2158,7 @@ Object.assign(C.acciones, {
     const calidad = ya ? 'Opción ' + (ya + 1) : '';
     T.put('tarifas', T.tarifaId(P.modeloId, d.v, calidad), { modeloId:P.modeloId, problema:d.v, calidad, precio:null, tiempo:null, garantiaDias:null, refaccionId:null });
   },
-  'tar-quitar'(d){ if (confirm('¿Quitar este precio?')) T.put('tarifas', d.v, null); },
+  'tar-quitar'(d){ T.confirmar('¿Quitar este precio? El sitio volverá a decir “por confirmar” para esta opción.', () => T.put('tarifas', d.v, null), { ok:'Quitar precio', peligro:true }); },
   'prod-nuevo'(){ U.prod = Object.assign(T.clone(PROD0), { open:!(U.prod.open && !U.prod.id) }); T.scheduleRender(); },
   'prod-cerrar'(){ U.prod = T.clone(PROD0); T.scheduleRender(); },
   'prod-editar'(d){ const p = S.productos[d.v], e = T.ex(d.v), k = T.costo(d.v); U.prod = { open:true, id:d.v, nombre:p.nombre, categoria:p.categoria, compat:p.compat || '', marca:p.marca || '', precio:p.precio == null ? '' : p.precio, sku:p.sku || '', min:e.min == null ? '' : e.min, costo:k == null ? '' : k, oculto:!!p.oculto }; T.scheduleRender(); window.scrollTo(0, 0); },

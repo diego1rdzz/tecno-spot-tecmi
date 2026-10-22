@@ -92,10 +92,11 @@ Object.assign(C.acciones, {
   'ct-atender'(d){ C.cerrarCita(d.v, 'atendiendo', { atendio:T.quien() }, 'En atención con ' + T.quien()); },
   'ct-noasistio'(d){ C.cerrarCita(d.v, 'noasistio', {}, 'No asistió'); },
   'ct-resuelto'(d){
-    const nota = prompt('¿Cómo se resolvió? (por ejemplo: duda de garantía aclarada)', '');
-    if (nota === null) return;
-    C.cerrarCita(d.v, 'atendida', { cierre:{ resultado:'resuelta', nota:nota.trim() || 'Resuelto sin orden', fecha:T.hoyISO() } }, 'Atendida: ' + (nota.trim() || 'resuelto sin orden'));
-    const cid = C.clienteDeCita(d.v); if (cid && nota.trim()) T.bitacora(cid, { tipo:'Cita', nota:nota.trim() });
+    T.confirmar('¿Cómo se resolvió esta cita?', nota => {
+      nota = (nota || '').trim();
+      C.cerrarCita(d.v, 'atendida', { cierre:{ resultado:'resuelta', nota:nota || 'Resuelto sin orden', fecha:T.hoyISO() } }, 'Atendida: ' + (nota || 'resuelto sin orden'));
+      const cid = C.clienteDeCita(d.v); if (cid && nota) T.bitacora(cid, { tipo:'Cita', nota });
+    }, { campo:'Nota (por ejemplo: duda de garantía aclarada)', ok:'Marcar como atendida' });
   },
   'ct-recibir'(d){ C.nuevaOrden({ citaId:d.v }); },
   'ct-entregar'(d){

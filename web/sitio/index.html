@@ -42,7 +42,10 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 16px/1.5 var(--sans);}
+/* La franja de la muesca del teléfono, con el color de la barra. */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bar)}
 h1,h2,h3,h4{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15;letter-spacing:-.01em}
 p{margin:0}
 a{color:var(--accent)}
@@ -60,7 +63,7 @@ button{font:inherit}
 .ico{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
 /* Barra superior */
-.top{position:sticky;top:0;z-index:20;background:var(--bar);color:var(--bar-ink);padding-top:env(safe-area-inset-top,0px)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bar);color:var(--bar-ink)}
 .top-in{max-width:1240px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
 .brand .tool{font:600 13px/1.1 var(--sans);color:var(--bar-muted);border-left:1px solid var(--bar-muted);padding-left:12px}
@@ -177,7 +180,7 @@ table.t tfoot td{font-weight:700;background:var(--sunk)}
 .stagebar{display:flex;gap:4px;flex-wrap:wrap}
 .stagebar span{font:600 12.5px/1 var(--sans);padding:6px 9px;border-radius:6px;background:var(--sunk);color:var(--muted)}
 .stagebar span.on{background:var(--accent);color:var(--accent-ink)}
-.stagebar span.lost{background:var(--crit);color:#fff}
+.stagebar span.lost{background:var(--crit);color:var(--ground)}
 
 /* Acceso */
 .login{max-width:440px;margin:40px auto;display:grid;gap:16px;text-align:left}
@@ -190,8 +193,12 @@ table.t tfoot td{font-weight:700;background:var(--sunk)}
 .drawer-head h2{font-size:21px}
 .drawer-body{overflow:auto;padding:18px;display:grid;gap:18px;align-content:start;flex:1}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--ground);padding:11px 16px;border-radius:8px;font:600 15px/1.3 var(--sans);max-width:min(560px,calc(100% - 32px));box-shadow:0 8px 24px rgba(0,0,0,.25)}
-.toast.crit{background:var(--crit);color:#fff}
-.toast.warn{background:var(--warn);color:#fff}
+.toast.crit{background:var(--crit);color:var(--ground)}
+.toast.warn{background:var(--warn);color:var(--ground)}
+/* Diálogo de confirmación */
+.dlg-scrim{z-index:50}
+.dlg{position:fixed;z-index:51;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,calc(100% - 32px));background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:18px;display:grid;gap:14px;box-shadow:0 18px 50px rgba(0,0,0,.28)}
+.dlg p{font:600 16.5px/1.4 var(--sans)}
 .loading{padding:80px 0;text-align:center;color:var(--muted)}
 .foot-sys{max-width:1240px;margin:0 auto;padding:0 16px 28px;font-size:13px;color:var(--muted)}
 
@@ -417,7 +424,9 @@ const CFG0 = {
 };
 
 /* Estado de pantalla compartido; cada herramienta agrega el suyo. */
-const U = { app:'', rol:'direccion', persona:'', drawer:null, toast:null };
+const U = { app:'', rol:'direccion', persona:'', drawer:null, toast:null, dlg:null };
+/* En la demostración publicada como artifact no se puede imprimir ni descargar archivos. */
+const EN_ARTIFACT = !!window.TS_ARTIFACT;
 
 /* ---------- utilidades ---------- */
 const $ = s => document.querySelector(s);
@@ -1024,7 +1033,7 @@ function render(){
   else if (Store.mode === 'supabase' && !accesoOk()) body = app.barra() + '<main>' + vAcceso() + '</main>';
   else if (!Store.loaded.config) body = app.barra() + '<main><div class="loading">Cargando…</div></main>';
   else body = app.vista();
-  $('#app').innerHTML = body + (U.toast ? '<div class="toast ' + (U.toast.k || '') + '" role="status">' + esc(U.toast.t) + '</div>' : '');
+  $('#app').innerHTML = body + vDialogo() + (U.toast ? '<div class="toast ' + (U.toast.k || '') + '" role="status">' + esc(U.toast.t) + '</div>' : '');
   if (fid){ const el = document.getElementById(fid); if (el){ try { el.focus({ preventScroll:true }); if (s0 != null && el.setSelectionRange) el.setSelectionRange(s0, s1); } catch (e) {} } }
   /* El panel lateral conserva su scroll solo si sigue mostrando lo mismo. */
   const dk = U.drawer ? U.drawer.kind + ':' + (U.drawer.id || '') : '';
@@ -1032,6 +1041,17 @@ function render(){
   ultimoDrawer = dk;
   if (app.despues) app.despues();
 }
+/* Confirmaciones dentro de la página: el visor de artifacts no muestra confirm() ni prompt(). */
+let dlgFn = null;
+function confirmar(texto, alAceptar, op){ U.dlg = Object.assign({ texto, ok:'Sí, continuar', no:'Cancelar', campo:null, valor:'', peligro:false }, op || {}); dlgFn = alAceptar; scheduleRender(); }
+function vDialogo(){
+  const d = U.dlg; if (!d) return '';
+  return '<div class="scrim dlg-scrim" data-act="ts-dlg-no"></div><div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlg-t"><p id="dlg-t">' + esc(d.texto) + '</p>'
+    + (d.campo ? '<label class="f" for="dlg-v">' + esc(d.campo) + '<input id="dlg-v" data-bind="dlg.valor" value="' + esc(d.valor) + '" autocomplete="off"></label>' : '')
+    + '<div class="row"><button class="btn ' + (d.peligro ? 'danger' : 'primary') + '" type="button" data-act="ts-dlg-ok">' + esc(d.ok) + '</button><button class="btn quiet" type="button" data-act="ts-dlg-no">' + esc(d.no) + '</button></div></div>';
+}
+TS_ACT['ts-dlg-ok'] = () => { const f = dlgFn, v = U.dlg ? U.dlg.valor : ''; U.dlg = null; dlgFn = null; scheduleRender(); if (f) f(v); };
+TS_ACT['ts-dlg-no'] = () => { U.dlg = null; dlgFn = null; scheduleRender(); };
 let toastTimer = null;
 function toast(t, k){ U.toast = { t, k }; scheduleRender(); clearTimeout(toastTimer); toastTimer = setTimeout(() => { U.toast = null; scheduleRender(); }, 4600); }
 /* Hojas imprimibles (recepción, entrega, ticket): se arman aparte y se imprimen sin la interfaz. */
@@ -1074,7 +1094,7 @@ document.addEventListener('submit', e => {
   e.preventDefault(); if (TS_FORM[f.dataset.form]) return TS_FORM[f.dataset.form](f);
   const app = actual(); const fn = app && app.formularios && app.formularios[f.dataset.form]; if (fn) fn(f);
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && U.drawer){ U.drawer = null; scheduleRender(); } });
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (U.dlg){ U.dlg = null; dlgFn = null; scheduleRender(); } else if (U.drawer){ U.drawer = null; scheduleRender(); } });
 
 async function start(inicial){
   const porHash = () => { const h = (location.hash || '').slice(1); return APPS[h] ? h : null; };
@@ -1104,7 +1124,8 @@ window.TS = {
   totalOrden, pagadoOrden, saldoOrden, ordenAbierta, equipoTxt, hist, crearOrden, ordenEdit, autorizar, apartarOrden, liberarOrden, descontarOrden, entregar, reclamoGarantia,
   garantias, registrarVenta, compraVerificada, aceptarCompra, caja,
   consultar, autorizarFuera, cancelarFuera, vistaCuenta, miCuenta, lineaTiempo, icsCita, logo, icono,
-  registrar, scheduleRender, toast, imprimir, barra, start, guardarPerfil, esInterno, rpc
+  registrar, scheduleRender, toast, imprimir, confirmar, barra, start, guardarPerfil, esInterno, rpc,
+  puedeImprimir:!EN_ARTIFACT, puedeDescargar:!EN_ARTIFACT
 };
 })();
 
@@ -1268,7 +1289,7 @@ function pListo(){
     + '<p>Folio <span class="mono folio">' + esc(h.folio) + '</span></p></div></article>'
     + '<div class="grid2"><div class="card"><h4>Ese día</h4><p>Al llegar, di tu folio o tu número de turno. Tu turno sirve para lo que necesites: dudas, entregar tu equipo para reparar o recogerlo.</p></div>'
     + '<div class="card"><h4>Qué llevar</h4><ul class="lista">' + queLlevar(w).map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div></div>'
-    + '<div class="row"><a class="btn primary" href="' + T.icsCita(c) + '" download="cita-' + esc(h.folio) + '.ics">Guardar en mi calendario</a>'
+    + '<div class="row">' + (T.puedeDescargar ? '<a class="btn primary" href="' + T.icsCita(c) + '" download="cita-' + esc(h.folio) + '.ics">Guardar en mi calendario</a>' : '')
     + '<a class="btn" href="https://wa.me/?text=' + encodeURIComponent(share) + '" target="_blank" rel="noopener">Compartir por WhatsApp</a>'
     + (wa ? '<a class="btn" href="' + esc(wa) + '" target="_blank" rel="noopener">Avisar a ' + esc(E().nombre) + '</a>' : '')
     + '<button class="btn" type="button" data-act="ver-cita">Ver o cancelar mi cita</button><button class="btn quiet" type="button" data-act="w-nuevo">Agendar otra</button></div>';

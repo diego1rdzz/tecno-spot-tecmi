@@ -38,7 +38,7 @@ function vVentas(){
     + '<button class="btn primary lg" type="button" data-act="pos-cobrar"' + (P.lineas.length ? '' : ' disabled') + '>Cobrar ' + T.fmtMoney(cobrar) + '</button></section></div>'
     + '<section class="stack tight"><h2>Ventas de los últimos 7 días</h2><div class="tbl"><table class="t"><thead><tr><th>Folio</th><th>Fecha</th><th>Cliente</th><th>Productos</th><th class="num">Total</th>' + (vc ? '<th class="num">Utilidad</th>' : '') + '<th></th></tr></thead><tbody>'
     + (ventasHoy.map(([id, v]) => { const uu = T.utilidad(v.lineas); return '<tr><td class="mono">' + esc(v.folio) + '</td><td>' + T.fmtD(v.fecha) + ' ' + esc(v.hora || '') + '</td><td>' + (v.clienteId ? C.linkCliente(v.clienteId) : '<span class="muted">Mostrador</span>') + '</td><td>' + esc(v.lineas.map(l => l.desc).join(', ')) + '</td><td class="num">' + T.fmtMoney(v.total) + (v.credito ? '<div class="small muted">toma ' + T.fmtMoney(v.credito) + '</div>' : '') + '</td>'
-      + (vc ? '<td class="num">' + (uu.pct != null ? T.pctTxt(uu.pct) : '—') + '</td>' : '') + '<td><button class="btn sm quiet" type="button" data-act="pos-ticket" data-v="' + esc(id) + '">Ticket</button></td></tr>'; }).join('') || '<tr><td colspan="7" class="muted">Sin ventas.</td></tr>')
+      + (vc ? '<td class="num">' + (uu.pct != null ? T.pctTxt(uu.pct) : '—') + '</td>' : '') + '<td>' + (T.puedeImprimir ? '<button class="btn sm quiet" type="button" data-act="pos-ticket" data-v="' + esc(id) + '">Ticket</button>' : '') + '</td></tr>'; }).join('') || '<tr><td colspan="7" class="muted">Sin ventas.</td></tr>')
     + '</tbody></table></div></section>';
 }
 C.vistas.ventas = vVentas;
@@ -74,7 +74,7 @@ Object.assign(C.acciones, {
     if (P.citaId) C.cerrarCita(P.citaId, 'atendida', { ventaId:r.id, clienteId:cid || null }, 'Venta ' + r.v.folio);
     U.pos = T.clone(POS0);
     T.toast('Venta ' + r.v.folio + (r.v.cambio ? ' · cambio ' + T.fmtMoney(r.v.cambio) : '') + '.');
-    if (confirm('¿Imprimir ticket?')) C.imprimirVenta(r.id);
+    if (T.puedeImprimir) T.confirmar('Venta ' + r.v.folio + ' registrada. ¿Imprimir el ticket?', () => C.imprimirVenta(r.id), { ok:'Imprimir ticket', no:'No' });
   }
 });
 C.cambios.push(t => {

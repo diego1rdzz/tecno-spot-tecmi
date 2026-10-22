@@ -156,7 +156,7 @@ function pListo(){
     + '<p>Folio <span class="mono folio">' + esc(h.folio) + '</span></p></div></article>'
     + '<div class="grid2"><div class="card"><h4>Ese día</h4><p>Al llegar, di tu folio o tu número de turno. Tu turno sirve para lo que necesites: dudas, entregar tu equipo para reparar o recogerlo.</p></div>'
     + '<div class="card"><h4>Qué llevar</h4><ul class="lista">' + queLlevar(w).map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div></div>'
-    + '<div class="row"><a class="btn primary" href="' + T.icsCita(c) + '" download="cita-' + esc(h.folio) + '.ics">Guardar en mi calendario</a>'
+    + '<div class="row">' + (T.puedeDescargar ? '<a class="btn primary" href="' + T.icsCita(c) + '" download="cita-' + esc(h.folio) + '.ics">Guardar en mi calendario</a>' : '')
     + '<a class="btn" href="https://wa.me/?text=' + encodeURIComponent(share) + '" target="_blank" rel="noopener">Compartir por WhatsApp</a>'
     + (wa ? '<a class="btn" href="' + esc(wa) + '" target="_blank" rel="noopener">Avisar a ' + esc(E().nombre) + '</a>' : '')
     + '<button class="btn" type="button" data-act="ver-cita">Ver o cancelar mi cita</button><button class="btn quiet" type="button" data-act="w-nuevo">Agendar otra</button></div>';

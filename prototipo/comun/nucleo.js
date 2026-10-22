@@ -68,7 +68,9 @@ const CFG0 = {
 };
 
 /* Estado de pantalla compartido; cada herramienta agrega el suyo. */
-const U = { app:'', rol:'direccion', persona:'', drawer:null, toast:null };
+const U = { app:'', rol:'direccion', persona:'', drawer:null, toast:null, dlg:null };
+/* En la demostración publicada como artifact no se puede imprimir ni descargar archivos. */
+const EN_ARTIFACT = !!window.TS_ARTIFACT;
 
 /* ---------- utilidades ---------- */
 const $ = s => document.querySelector(s);
@@ -675,7 +677,7 @@ function render(){
   else if (Store.mode === 'supabase' && !accesoOk()) body = app.barra() + '<main>' + vAcceso() + '</main>';
   else if (!Store.loaded.config) body = app.barra() + '<main><div class="loading">Cargando…</div></main>';
   else body = app.vista();
-  $('#app').innerHTML = body + (U.toast ? '<div class="toast ' + (U.toast.k || '') + '" role="status">' + esc(U.toast.t) + '</div>' : '');
+  $('#app').innerHTML = body + vDialogo() + (U.toast ? '<div class="toast ' + (U.toast.k || '') + '" role="status">' + esc(U.toast.t) + '</div>' : '');
   if (fid){ const el = document.getElementById(fid); if (el){ try { el.focus({ preventScroll:true }); if (s0 != null && el.setSelectionRange) el.setSelectionRange(s0, s1); } catch (e) {} } }
   /* El panel lateral conserva su scroll solo si sigue mostrando lo mismo. */
   const dk = U.drawer ? U.drawer.kind + ':' + (U.drawer.id || '') : '';
@@ -683,6 +685,17 @@ function render(){
   ultimoDrawer = dk;
   if (app.despues) app.despues();
 }
+/* Confirmaciones dentro de la página: el visor de artifacts no muestra confirm() ni prompt(). */
+let dlgFn = null;
+function confirmar(texto, alAceptar, op){ U.dlg = Object.assign({ texto, ok:'Sí, continuar', no:'Cancelar', campo:null, valor:'', peligro:false }, op || {}); dlgFn = alAceptar; scheduleRender(); }
+function vDialogo(){
+  const d = U.dlg; if (!d) return '';
+  return '<div class="scrim dlg-scrim" data-act="ts-dlg-no"></div><div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlg-t"><p id="dlg-t">' + esc(d.texto) + '</p>'
+    + (d.campo ? '<label class="f" for="dlg-v">' + esc(d.campo) + '<input id="dlg-v" data-bind="dlg.valor" value="' + esc(d.valor) + '" autocomplete="off"></label>' : '')
+    + '<div class="row"><button class="btn ' + (d.peligro ? 'danger' : 'primary') + '" type="button" data-act="ts-dlg-ok">' + esc(d.ok) + '</button><button class="btn quiet" type="button" data-act="ts-dlg-no">' + esc(d.no) + '</button></div></div>';
+}
+TS_ACT['ts-dlg-ok'] = () => { const f = dlgFn, v = U.dlg ? U.dlg.valor : ''; U.dlg = null; dlgFn = null; scheduleRender(); if (f) f(v); };
+TS_ACT['ts-dlg-no'] = () => { U.dlg = null; dlgFn = null; scheduleRender(); };
 let toastTimer = null;
 function toast(t, k){ U.toast = { t, k }; scheduleRender(); clearTimeout(toastTimer); toastTimer = setTimeout(() => { U.toast = null; scheduleRender(); }, 4600); }
 /* Hojas imprimibles (recepción, entrega, ticket): se arman aparte y se imprimen sin la interfaz. */
@@ -725,7 +738,7 @@ document.addEventListener('submit', e => {
   e.preventDefault(); if (TS_FORM[f.dataset.form]) return TS_FORM[f.dataset.form](f);
   const app = actual(); const fn = app && app.formularios && app.formularios[f.dataset.form]; if (fn) fn(f);
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && U.drawer){ U.drawer = null; scheduleRender(); } });
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (U.dlg){ U.dlg = null; dlgFn = null; scheduleRender(); } else if (U.drawer){ U.drawer = null; scheduleRender(); } });
 
 async function start(inicial){
   const porHash = () => { const h = (location.hash || '').slice(1); return APPS[h] ? h : null; };
@@ -755,6 +768,7 @@ window.TS = {
   totalOrden, pagadoOrden, saldoOrden, ordenAbierta, equipoTxt, hist, crearOrden, ordenEdit, autorizar, apartarOrden, liberarOrden, descontarOrden, entregar, reclamoGarantia,
   garantias, registrarVenta, compraVerificada, aceptarCompra, caja,
   consultar, autorizarFuera, cancelarFuera, vistaCuenta, miCuenta, lineaTiempo, icsCita, logo, icono,
-  registrar, scheduleRender, toast, imprimir, barra, start, guardarPerfil, esInterno, rpc
+  registrar, scheduleRender, toast, imprimir, confirmar, barra, start, guardarPerfil, esInterno, rpc,
+  puedeImprimir:!EN_ARTIFACT, puedeDescargar:!EN_ARTIFACT
 };
 })();

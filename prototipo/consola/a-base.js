@@ -75,7 +75,7 @@ function vista(){
   return barra() + '<div class="consola"><nav class="lado" aria-label="Módulos">' + nav
     + (T.Store.mode === 'local' ? '<button class="btn sm quiet reset" type="button" data-act="reset-demo">Restablecer demostración</button>' : '') + '</nav>'
     + '<main class="contenido"><div class="stack"><div class="console-head"><div><div class="eyebrow">' + esc(mod[2]) + '</div><h1>' + esc(mod[1]) + '</h1></div>' + (C.cabeza[U.tab] ? C.cabeza[U.tab]() : '') + '</div>'
-    + (supa() ? '' : '<p class="note">Prototipo: el rol se simula arriba a la derecha. Con Supabase lo decide la base de datos, y costos y utilidad solo llegan a dirección y administración.</p>')
+    + (supa() ? '' : '<p class="note">Prototipo: el rol se simula con «Ver como». Con Supabase lo decide la base de datos, y costos y utilidad solo llegan a dirección y administración.</p>')
     + C.vistas[U.tab]() + '</div></main></div>' + vDrawer();
 }
 C.cabeza = {};
@@ -92,6 +92,6 @@ C.vista = vista;
 C.barra = barra;
 C.acciones.tab = d => { U.tab = d.v; U.drawer = null; T.scheduleRender(); window.scrollTo(0, 0); };
 C.acciones.cerrar = () => { U.drawer = null; T.scheduleRender(); };
-C.acciones['reset-demo'] = () => { if (confirm('¿Borrar los cambios de este navegador y volver a los datos de demostración?')){ T.resetDemo(); U.drawer = null; T.toast('Demostración restablecida.'); } };
+C.acciones['reset-demo'] = () => T.confirmar('¿Borrar los cambios de este navegador y volver a los datos de demostración?', () => { T.resetDemo(); U.drawer = null; T.toast('Demostración restablecida.'); }, { ok:'Restablecer', peligro:true });
 C.estado = { tab:'hoy' };
 })();

@@ -35,7 +35,7 @@ function tarjetaCita(r){
   const e = T.estadoDe(T.ESTADOS_CITA, r.estado);
   return '<article class="card"><div class="row"><h3>Turno ' + esc(r.turno) + ' · ' + esc(T.fmtDia(r.fecha)) + ' · ' + esc(r.hora) + '</h3><span class="spacer"></span>' + chip(e[2], e[1]) + '</div>'
     + '<p class="small muted">' + esc(T.MOTIVOS_CITA[r.motivo] || '') + ' · ' + esc(r.modalidad === 'domicilio' ? 'a domicilio' : r.lugar) + ' · folio <span class="mono">' + esc(r.folio) + '</span></p>'
-    + (r.estado === 'agendada' ? '<div class="row"><a class="btn sm" href="' + T.icsCita(r) + '" download="cita-' + esc(r.folio) + '.ics">Guardar en mi calendario</a><button class="btn sm quiet" type="button" data-act="p-cancelar" data-f="' + esc(r.folio) + '">Cancelar cita</button></div>' : '') + '</article>';
+    + (r.estado === 'agendada' ? '<div class="row">' + (T.puedeDescargar ? '<a class="btn sm" href="' + T.icsCita(r) + '" download="cita-' + esc(r.folio) + '.ics">Guardar en mi calendario</a>' : '') + '<button class="btn sm quiet" type="button" data-act="p-cancelar" data-f="' + esc(r.folio) + '">Cancelar cita</button></div>' : '') + '</article>';
 }
 function formCita(){
   const F = U.pf, dias = T.diasAgenda(), cta = U.pCuenta;
@@ -94,11 +94,12 @@ T.registrar('portal', {
       catch (e) { T.toast(e.message, 'crit'); }
       refrescar();
     },
-    async 'p-cancelar'(d){
-      if (!confirm('¿Cancelar esta cita?')) return;
-      try { await T.cancelarFuera(d.f, U.pCuenta.cliente.tel, 'cliente'); T.toast('Cita cancelada.'); await T.cargarOcupacion(); }
-      catch (e) { T.toast(e.message, 'crit'); }
-      refrescar();
+    'p-cancelar'(d){
+      T.confirmar('¿Cancelar tu cita ' + d.f + '?', async () => {
+        try { await T.cancelarFuera(d.f, U.pCuenta.cliente.tel, 'cliente'); T.toast('Cita cancelada.'); await T.cargarOcupacion(); }
+        catch (e) { T.toast(e.message, 'crit'); }
+        refrescar();
+      }, { ok:'Cancelar cita', no:'Conservarla', peligro:true });
     },
     'p-nueva'(){ U.pf = U.pf ? null : { motivo:'reparacion', problema:'', equipo:'', fecha:'', hora:'', nota:'', enviando:false }; T.scheduleRender(); }
   },
