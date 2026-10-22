@@ -53,6 +53,10 @@ Los precios viven en archivos fáciles de llenar en Excel o Google Sheets (guard
 
 Roles: `direccion`, `administracion`, `mostrador`, `tecnico` y `cliente` (cada cuenta nueva nace `pendiente`).
 
+## Avisos con n8n
+
+Supabase manda a n8n cada cita nueva, presupuesto listo, equipo listo y lo demás, y a hora fija los recordatorios y el reporte del día. Pasos en [`n8n/README.md`](n8n/README.md).
+
 ## Publicar (Vercel)
 
 El `vercel.json` de la raíz publica `web/sitio`. Para la consola y el portal crea otros dos proyectos con *Root Directory* `web/consola` y `web/portal` (Framework “Other”, sin comando de build). Pon esas direcciones en `supabase/config.json › enlaces` y vuelve a armar.
@@ -71,7 +75,8 @@ prototipo/
   demo.py              datos de demostración
   build.py             arma prototipo/dist y web/
 supabase/
-  migrations/          esquema, reglas por rol y funciones
+  migrations/          esquema, reglas por rol y funciones; avisos para n8n
   instalar.py          genera instalar.sql (y precios.sql)
+n8n/                   flujo de avisos para importar en n8n
 web/                   lo que se publica
 ```

@@ -1,0 +1,153 @@
+{
+  "name": "Tecno-Spot · avisos",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Tecno-Spot · avisos\n\nSupabase manda aquí cada aviso: citas nuevas, reprogramadas y canceladas; presupuestos; equipos listos y entregados; recordatorios (19:00) y el reporte del día (21:00).\n\n1. En **Revisar y redactar** pega el secreto (`select secreto from privado.n8n;` en Supabase) y la dirección del sitio.\n2. Cambia los tres nodos grises por tus canales: Telegram, WhatsApp o correo. El texto va en `{{ $json.texto }}` y el número del cliente en `{{ $json.whatsapp }}`.\n3. Activa el flujo y copia la *Production URL* del primer nodo a Supabase:\n   `update privado.n8n set url = '…';`",
+        "height": 380,
+        "width": 460
+      },
+      "id": "82e654f8-897f-5896-afc5-303f0f5ee821",
+      "name": "Cómo se configura",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tecno-spot",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "41b48586-41ab-5434-b9f8-2a3acffcb006",
+      "name": "Avisos de Supabase",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "7613f4ca-8e3a-5fa8-be3a-942c7d7e941b"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Tecno-Spot · nodo \"Revisar y redactar\" del flujo de n8n.\n// Revisa que el aviso venga de Supabase y redacta el mensaje para cada quien:\n//   canal \"negocio\"   → aviso al equipo de Tecno-Spot\n//   canal \"cliente\"   → mensaje al cliente por WhatsApp (lleva su número con 52)\n//   canal \"direccion\" → reporte del día\n// Cambia estas dos líneas:\nconst SECRETO = 'PEGA_AQUI_EL_SECRETO';   // en Supabase: select secreto from privado.n8n;\nconst SITIO = '';                          // dirección del sitio, p. ej. https://tecno-spot.vercel.app (vacío = por confirmar)\nconst LUGAR = 'la cafetería de Tecmilenio'; // cómo se dice \"en …\" en los mensajes\n\nconst entrada = $input.first().json;\nconst cabeceras = entrada.headers || {};\nif (cabeceras['x-tecno-spot'] !== SECRETO) {\n  throw new Error('Aviso rechazado: el secreto no coincide. Copia el de Supabase (select secreto from privado.n8n).');\n}\nconst { evento, datos = {} } = entrada.body || {};\n\nconst DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];\nconst MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];\nconst fecha = iso => { if (!iso) return ''; const [a, m, d] = iso.split('-').map(Number); return DIAS[new Date(a, m - 1, d).getDay()] + ' ' + d + ' de ' + MESES[m - 1]; };\nconst dinero = n => '$' + Number(n || 0).toFixed(Number(n) % 1 ? 2 : 0).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\nconst nombre1 = n => String(n || '').trim().split(/\\s+/)[0] || '';\nconst PROBLEMAS = { pantalla: 'pantalla', bateria: 'batería', carga: 'carga', bocina: 'bocina', microfono: 'micrófono', camara: 'cámara', tapa: 'tapa trasera', humedad: 'se mojó', botones: 'botones', software: 'software', liberacion: 'liberación', mantenimiento: 'mantenimiento', diagnostico: 'diagnóstico' };\nconst MOTIVOS = { reparacion: 'Reparación', entrega: 'Recoger equipo', duda: 'Duda o revisión', compra: 'Comprar', venta: 'Vender o cambiar celular', garantia: 'Garantía' };\nconst RECHAZOS = { precio: 'precio', tiempo: 'tiempo de reparación', noconviene: 'prefiere comprar otro equipo', sinarreglo: 'no tiene arreglo', otro: 'otro motivo' };\nconst enlace = folio => SITIO ? ' Puedes verlo aquí: ' + SITIO.replace(/\\/?$/, '/') + '?folio=' + encodeURIComponent(folio) : '';\nconst donde = d => d.modalidad === 'domicilio' ? 'en tu domicilio' : 'en ' + LUGAR;\n\nconst salida = [];\nconst negocio = texto => salida.push({ canal: 'negocio', evento, folio: datos.folio || '', texto });\nconst cliente = (d, texto) => { const tel = String(d.tel || '').replace(/\\D/g, '').slice(-10); if (tel.length === 10) salida.push({ canal: 'cliente', evento, folio: d.folio || '', nombre: d.nombre || '', tel, whatsapp: '52' + tel, texto }); };\n\nswitch (evento) {\n  case 'cita_nueva': {\n    const q = datos.cotizacion || {};\n    const que = [PROBLEMAS[q.problema], q.equipo].filter(Boolean).join(' · ');\n    negocio('Nueva cita ' + datos.folio + ' · turno ' + datos.turno + ', ' + fecha(datos.fecha) + ' a las ' + datos.hora + '\\n'\n      + datos.nombre + ' (' + datos.tel + ')' + (datos.tecmi ? ' · comunidad Tecmilenio' : '') + '\\n'\n      + (MOTIVOS[datos.motivo] || datos.motivo) + (que ? ': ' + que : '') + (q.precio != null ? ' · cotizado en ' + dinero(q.precio) : '')\n      + (datos.modalidad === 'domicilio' ? '\\nA domicilio: ' + (datos.direccion || 'sin dirección') : '') + (datos.nota ? '\\nNota: ' + datos.nota : ''));\n    cliente(datos, 'Hola ' + nombre1(datos.nombre) + ', tu cita en Tecno-Spot quedó para el ' + fecha(datos.fecha) + ' a las ' + datos.hora + ' (turno ' + datos.turno + ') ' + donde(datos) + '. Tu folio es ' + datos.folio + '.');\n    break;\n  }\n  case 'cita_reprogramada':\n    negocio('Cita ' + datos.folio + ' de ' + datos.nombre + ' cambió de ' + datos.antes + ' a ' + fecha(datos.fecha) + ' ' + datos.hora + ' (turno ' + datos.turno + ').');\n    cliente(datos, 'Hola ' + nombre1(datos.nombre) + ', tu cita en Tecno-Spot ahora es el ' + fecha(datos.fecha) + ' a las ' + datos.hora + ' (turno ' + datos.turno + '). Folio ' + datos.folio + '.');\n    break;\n  case 'cita_cancelada':\n    negocio('Se canceló la cita ' + datos.folio + ' de ' + datos.nombre + ' (' + fecha(datos.fecha) + ' ' + datos.hora + ').');\n    break;\n  case 'presupuesto_listo':\n    cliente(datos, 'Hola ' + nombre1(datos.nombre) + ', ya revisamos tu ' + datos.equipo + '.' + (datos.diagnostico ? ' ' + datos.diagnostico : '') + ' El presupuesto es de ' + dinero(datos.total) + '. ¿Lo autorizas? Tu folio es ' + datos.folio + '.' + enlace(datos.folio));\n    break;\n  case 'presupuesto_autorizado':\n    negocio(datos.nombre + ' autorizó el presupuesto de ' + datos.folio + ' (' + datos.equipo + ') por ' + dinero(datos.total) + '.' + (datos.estado === 'espera' ? ' Falta una refacción.' : ' Ya se puede reparar.'));\n    break;\n  case 'presupuesto_rechazado':\n    negocio(datos.nombre + ' no autorizó ' + datos.folio + ' (' + datos.equipo + '): ' + (RECHAZOS[datos.motivo_rechazo] || 'sin motivo') + '. Hay que devolver el equipo.');\n    break;\n  case 'equipo_listo':\n    cliente(datos, 'Hola ' + nombre1(datos.nombre) + ', tu ' + datos.equipo + ' ya está listo. Pasa por él a ' + LUGAR + ' con tu folio ' + datos.folio + '.' + (Number(datos.saldo) > 0 ? ' Saldo: ' + dinero(datos.saldo) + '.' : ''));\n    break;\n  case 'equipo_entregado':\n    if (datos.garantiaHasta) cliente(datos, 'Gracias por confiar en Tecno-Spot, ' + nombre1(datos.nombre) + '. La garantía de tu ' + datos.equipo + ' cubre hasta el ' + fecha(datos.garantiaHasta) + '. Folio ' + datos.folio + '.');\n    break;\n  case 'recordatorios':\n    (datos.citas || []).forEach(c => cliente(c, 'Hola ' + nombre1(c.nombre) + ', te recordamos tu cita de mañana en Tecno-Spot a las ' + c.hora + ' (turno ' + c.turno + ') ' + donde(c) + '. Folio ' + c.folio + '.'));\n    break;\n  case 'reporte_diario': {\n    const c = datos.citas || {}, t = datos.taller || {}, k = datos.caja || {}, v = datos.ventas || {};\n    const formas = Object.entries(k.por_forma || {}).map(([f, m]) => f + ' ' + dinero(m)).join(', ') || 'sin movimientos';\n    salida.push({ canal: 'direccion', evento, texto: 'Tecno-Spot · reporte del ' + fecha(datos.fecha) + '\\n\\n'\n      + 'Citas: ' + (c.total || 0) + ' (' + (c.atendidas || 0) + ' atendidas, ' + (c.no_asistieron || 0) + ' no asistieron, ' + (c.canceladas || 0) + ' canceladas' + (c.sin_cerrar ? ', ' + c.sin_cerrar + ' sin cerrar' : '') + '). Mañana: ' + (c.manana || 0) + '.\\n'\n      + 'Taller: ' + (t.recibidas || 0) + ' recibidos, ' + (t.entregadas || 0) + ' entregados, ' + (t.en_taller || 0) + ' en reparación, ' + (t.esperando_autorizacion || 0) + ' esperando autorización.\\n'\n      + 'Listos sin recoger: ' + ((t.listas_sin_recoger || []).map(x => x.folio).join(', ') || 'ninguno') + '.\\n'\n      + 'Atrasados: ' + ((t.atrasadas || []).map(x => x.folio + ' (prometido ' + x.promesa + ')').join(', ') || 'ninguno') + '.\\n'\n      + 'Caja: reparaciones ' + dinero(k.reparaciones) + ', ventas ' + dinero(k.ventas) + ', compras de usados ' + dinero(k.compras_de_usados) + '. Por forma de pago: ' + formas + '.\\n'\n      + 'Ventas: ' + (v.n || 0) + ' por ' + dinero(v.total) + '.' });\n    break;\n  }\n  default:\n    negocio('Aviso de prueba de Tecno-Spot: ' + JSON.stringify(datos));\n}\nreturn salida.map(json => ({ json }));\n"
+      },
+      "id": "928b4ba6-c6bf-509e-8ff8-23fb241ea9ce",
+      "name": "Revisar y redactar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 3,
+        "output": "={{ { negocio: 0, cliente: 1, direccion: 2 }[$json.canal] }}"
+      },
+      "id": "d2f82091-4bfa-5a32-81f9-954d60bc36e1",
+      "name": "¿A quién va?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "aebacdd6-8487-5f88-a429-abc9bba2d9f1",
+      "name": "Aviso al negocio (cambia por tu canal)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        760,
+        -160
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "f38b2707-8a68-5f1e-afc0-f0e3eb987569",
+      "name": "Mensaje al cliente (cambia por WhatsApp)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        760,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "db2bac04-910d-50f9-98ee-1856883f44dd",
+      "name": "Reporte a dirección (cambia por correo)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        760,
+        160
+      ]
+    }
+  ],
+  "connections": {
+    "Avisos de Supabase": {
+      "main": [
+        [
+          {
+            "node": "Revisar y redactar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revisar y redactar": {
+      "main": [
+        [
+          {
+            "node": "¿A quién va?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿A quién va?": {
+      "main": [
+        [
+          {
+            "node": "Aviso al negocio (cambia por tu canal)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensaje al cliente (cambia por WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reporte a dirección (cambia por correo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Monterrey"
+  },
+  "active": false,
+  "pinData": {}
+}
