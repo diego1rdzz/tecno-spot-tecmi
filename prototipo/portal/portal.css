@@ -1,0 +1,9 @@
+/* Portal de clientes: una columna, pestañas grandes, tarjetas por reparación y por cita. */
+.portal{max-width:780px;margin:0 auto;display:grid;gap:16px}
+.bigtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:560px){.bigtabs{grid-template-columns:repeat(2,1fr)}}
+.bigtabs button{border:1px solid var(--rule-strong);background:var(--surface);border-radius:12px;padding:14px 8px;font:600 15px/1.2 var(--display);color:var(--ink);cursor:pointer;min-height:56px;display:flex;gap:6px;align-items:center;justify-content:center}
+.bigtabs button[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--spot);color:#2A1C00;font:700 11.5px/1 var(--sans)}
+.portal .panel h2{font-size:24px}
+details summary{cursor:pointer;font-weight:600}

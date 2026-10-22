@@ -72,7 +72,7 @@ button{font:inherit}
 .pill{font:500 11px/1 var(--mono);padding:5px 8px;border-radius:999px;border:1px solid var(--bar-muted);color:var(--bar-ink);white-space:nowrap}
 .pill.solid{background:var(--bar-hi);border-color:transparent}
 .pill.live::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#5CC48F;margin-right:6px;vertical-align:0}
-@media (max-width:640px){.top{position:static}.top-in{gap:6px 12px}.mode{margin-left:0}}
+@media (max-width:640px){.top{position:static}.top-in{gap:6px 12px}.mode{margin-left:0}.topnav{flex-wrap:nowrap;overflow-x:auto;width:100%;scrollbar-width:none;margin-inline:-6px}.topnav::-webkit-scrollbar{display:none}.topnav a,.topnav button{white-space:nowrap}}
 
 main{max-width:1240px;margin:0 auto;padding-inline:16px;padding-block:22px 72px}
 .stack{display:grid;gap:18px;align-content:start}
@@ -209,6 +209,15 @@ table.t tfoot td{font-weight:700;background:var(--sunk)}
   #print .firma div{border-top:1px solid #000;padding-top:4px;text-align:center}
   #print .pie{margin-top:14px;font-size:11px;color:#333}
 }
+/* Portal de clientes: una columna, pestañas grandes, tarjetas por reparación y por cita. */
+.portal{max-width:780px;margin:0 auto;display:grid;gap:16px}
+.bigtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:560px){.bigtabs{grid-template-columns:repeat(2,1fr)}}
+.bigtabs button{border:1px solid var(--rule-strong);background:var(--surface);border-radius:12px;padding:14px 8px;font:600 15px/1.2 var(--display);color:var(--ink);cursor:pointer;min-height:56px;display:flex;gap:6px;align-items:center;justify-content:center}
+.bigtabs button[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--spot);color:#2A1C00;font:700 11.5px/1 var(--sans)}
+.portal .panel h2{font-size:24px}
+details summary{cursor:pointer;font-weight:600}
 </style>
 </head>
 <body>
@@ -306,8 +315,9 @@ const fechaDe = iso => new Date(iso + 'T12:00:00');
 function sumarDias(iso, n){ const d = fechaDe(iso); d.setDate(d.getDate() + n); return isoLocal(d); }
 const difDias = (a, b) => Math.round((fechaDe(a) - fechaDe(b)) / DAY);
 function fmtD(iso){ if (!/^\d{4}-\d{2}-\d{2}/.test(iso || '')) return '—'; const p = iso.slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
-const fmtDia = iso => fechaDe(iso).toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long' });
-const fmtDiaCorto = iso => fechaDe(iso).toLocaleDateString('es-MX', { weekday:'short', day:'numeric', month:'short' }).replace(/\./g, '');
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const fmtDia = iso => cap(fechaDe(iso).toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long' }));
+const fmtDiaCorto = iso => cap(fechaDe(iso).toLocaleDateString('es-MX', { weekday:'short', day:'numeric', month:'short' }).replace(/\./g, ''));
 const ahoraHM = () => { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
 const aMin = hm => { const p = String(hm || '0:0').split(':').map(Number); return p[0] * 60 + (p[1] || 0); };
 const deMin = m => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
@@ -391,13 +401,9 @@ function accesoOk(){
   if (!Auth.session || !Auth.perfil) return false;
   return acceso() === 'interno' ? esInterno() : (rolCuenta() === 'cliente' && !!Auth.perfil.cliente_id);
 }
+/* Afuera (sitio y portal) solo se leen tablas públicas; lo del cliente llega por ts_mi_cuenta. */
 const PUBLICAS = ['config','modelos','tarifas','productos','existencias'];
-function colsPara(){
-  const a = acceso();
-  if (a === 'publico' || !accesoOk()) return PUBLICAS.slice();
-  if (a === 'cliente') return PUBLICAS.concat(['clientes','citas','ordenes','ventas']);
-  return COLS.slice();
-}
+function colsPara(){ return acceso() === 'interno' && accesoOk() ? COLS.slice() : PUBLICAS.slice(); }
 async function cargar(){
   const sb = Store.sb; COLS.forEach(c => { S[c] = {}; Store.loaded[c] = false; }); S.perfiles = {};
   const cols = colsPara();
@@ -798,6 +804,23 @@ function vistaCita(c){
   const ord = c.ordenId && S.ordenes[c.ordenId];
   return { tipo:'cita', folio:c.folio, estado:c.estado, fecha:c.fecha, hora:c.hora, turno:c.turno, lugar:c.lugar, motivo:c.motivo, modalidad:c.modalidad, cotizacion:c.cotizacion, nombre:(c.contacto.nombre || '').split(' ')[0], orden:ord ? ord.folio : null };
 }
+/* Lo que el cliente ve de su cuenta en el portal: nunca notas internas, costos ni códigos. */
+function vistaCuenta(cid){
+  const c = S.clientes[cid]; if (!c) return null;
+  const porFecha = (a, b) => (b.creada || b.fecha || '').localeCompare(a.creada || a.fecha || '');
+  return { cliente:{ nombre:c.nombre, tel:c.tel, correo:c.correo || '', dispositivos:(c.dispositivos || []).map(d => ({ marca:d.marca, modelo:d.modelo, imei:d.imei, color:d.color, origen:d.origen, ref:d.ref, garantiaHasta:d.garantiaHasta || null })) },
+    ordenes:vals(S.ordenes).filter(o => o.clienteId === cid).map(vistaOrden).sort(porFecha),
+    citas:vals(S.citas).filter(x => x.clienteId === cid).map(vistaCita).sort(porFecha),
+    ventas:vals(S.ventas).filter(v => v.clienteId === cid).map(v => ({ folio:v.folio, fecha:v.fecha, total:v.total, credito:v.credito || 0, lineas:(v.lineas || []).map(l => ({ desc:l.desc, cant:l.cant, precio:l.precio, garantiaHasta:l.garantiaHasta || null })) })).sort(porFecha) };
+}
+async function miCuenta(cid){ if (Store.sb) return rpc('ts_mi_cuenta', {}); return vistaCuenta(cid); }
+/* Línea de tiempo de una reparación, igual en el sitio y en el portal. */
+const PASOS_ORDEN = [['recibido','Recibimos tu equipo'],['diagnostico','Lo estamos revisando'],['presupuesto','Te enviamos el presupuesto'],['autorizado','Autorizaste la reparación'],['reparacion','Lo estamos reparando'],['listo','Listo para entregar'],['entregado','Entregado']];
+function lineaTiempo(r){
+  const actual = r.estado === 'espera' ? 'reparacion' : r.estado === 'rechazado' ? 'presupuesto' : r.estado;
+  const i = PASOS_ORDEN.findIndex(p => p[0] === actual);
+  return '<ol class="timeline">' + PASOS_ORDEN.map(([k, t], j) => '<li class="' + (j < i ? 'on' : j === i ? 'now' : '') + '"><div><b>' + esc(k === 'reparacion' && r.estado === 'espera' ? 'Esperando una refacción' : k === 'presupuesto' && r.estado === 'rechazado' ? 'No autorizaste la reparación' : t) + '</b>' + (j === i && r.promesa && r.estado !== 'entregado' ? '<span>Fecha estimada: ' + esc(fmtD(r.promesa)) + '</span>' : '') + '</div></li>').join('') + '</ol>';
+}
 function telDe(x){ const cl = S.clientes[x.clienteId]; return digitos((cl && cl.tel) || (x.contacto && x.contacto.tel)); }
 function buscarFolio(folio, tel){
   const f = String(folio || '').trim().toUpperCase(), t = digitos(tel);
@@ -868,7 +891,7 @@ const LINKS = window.TS_LINKS || {};
 function registrar(nombre, app){ APPS[nombre] = app; if (app.estado) Object.keys(app.estado).forEach(k => { if (!(k in U)) U[k] = clone(app.estado[k]); }); }
 const actual = () => APPS[U.app] || APPS[Object.keys(APPS)[0]];
 
-let queued = false;
+let queued = false, ultimoDrawer = '';
 function scheduleRender(){ if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; render(); }); }
 function render(){
   const app = actual(); if (!app) return;
@@ -882,7 +905,10 @@ function render(){
   else body = app.vista();
   $('#app').innerHTML = body + (U.toast ? '<div class="toast ' + (U.toast.k || '') + '" role="status">' + esc(U.toast.t) + '</div>' : '');
   if (fid){ const el = document.getElementById(fid); if (el){ try { el.focus({ preventScroll:true }); if (s0 != null && el.setSelectionRange) el.setSelectionRange(s0, s1); } catch (e) {} } }
-  const db2 = document.querySelector('.drawer-body'); if (db2 && dScroll) db2.scrollTop = dScroll;
+  /* El panel lateral conserva su scroll solo si sigue mostrando lo mismo. */
+  const dk = U.drawer ? U.drawer.kind + ':' + (U.drawer.id || '') : '';
+  const db2 = document.querySelector('.drawer-body'); if (db2 && dScroll && dk === ultimoDrawer) db2.scrollTop = dScroll;
+  ultimoDrawer = dk;
   if (app.despues) app.despues();
 }
 let toastTimer = null;
@@ -956,14 +982,135 @@ window.TS = {
   verCostos, costo, montoLineas, sinPrecio, utilidad, bajoMargen, ex, setEx, prodNombre,
   totalOrden, pagadoOrden, saldoOrden, ordenAbierta, equipoTxt, hist, crearOrden, ordenEdit, autorizar, apartarOrden, liberarOrden, descontarOrden, entregar, reclamoGarantia,
   garantias, registrarVenta, compraVerificada, aceptarCompra, caja,
-  consultar, autorizarFuera, cancelarFuera, icsCita, logo, icono,
+  consultar, autorizarFuera, cancelarFuera, vistaCuenta, miCuenta, lineaTiempo, icsCita, logo, icono,
   registrar, scheduleRender, toast, imprimir, barra, start, guardarPerfil, esInterno, rpc
 };
 })();
 
 </script>
 <script>
-(function(){ const T = window.TS; T.registrar('portal', { barra(){ return T.barra('portal'); }, vista(){ return T.barra('portal') + '<main>En construcción</main>'; }, acceso:'publico' }); })();
+/* Portal de clientes de Tecno-Spot: sus reparaciones (con autorización del
+   presupuesto), sus citas, sus equipos con garantía y sus compras. Lee una
+   vista resumida de su cuenta: nunca notas internas, costos ni códigos. */
+(function(){
+'use strict';
+const T = window.TS, U = T.U, S = T.S, esc = T.esc, chip = T.chip, PC = T.PC;
+const local = () => T.Store.mode !== 'supabase';
+
+function barra(){
+  const salir = local() && U.pCliente ? '<button class="btn sm onbar" type="button" data-act="p-salir">Salir</button>' : '';
+  return T.barra('Mi cuenta', T.LINKS.sitio ? '<a href="' + esc(T.LINKS.sitio) + '">Ir al sitio</a>' : '', salir);
+}
+function vEntrar(){
+  const cls = T.ents(S.clientes).sort((a, b) => a[1].nombre.localeCompare(b[1].nombre, 'es'));
+  return '<div class="login panel">' + T.logo('grande') + '<h1>Mi cuenta</h1><p class="muted">Tus reparaciones, tus citas, tus equipos con su garantía y tus compras.</p>'
+    + '<form class="stack" data-form="p-entrar"><label class="f" for="p-cli">Cuenta<select id="p-cli" data-bind="pElegido"><option value="">Elige un cliente de la demostración…</option>' + cls.map(([id, c]) => '<option value="' + esc(id) + '"' + (U.pElegido === id ? ' selected' : '') + '>' + esc(c.nombre) + '</option>').join('') + '</select></label>'
+    + '<button class="btn primary" type="submit"' + (U.pElegido ? '' : ' disabled') + '>Entrar</button></form>'
+    + '<p class="note">Demostración: aquí se elige la cuenta. Con la base real cada cliente entra con su correo y solo ve lo suyo.</p></div>';
+}
+function tarjetaOrden(r){
+  const e = T.estadoDe(T.ESTADOS_ORDEN, r.estado), q = U.pq;
+  const saldo = r.total != null ? Math.max(0, r.total - (r.pagado || 0)) : null;
+  const decidiendo = q.folio === r.folio;
+  return '<article class="card' + (r.estado === 'presupuesto' ? ' attn' : '') + '"><div class="row"><h3>' + esc(r.equipo) + '</h3><span class="spacer"></span>' + chip(e[2], e[1]) + '</div>'
+    + '<p class="small muted">' + esc(T.PROB[r.problema] ? T.PROB[r.problema].t : '') + ' · folio <span class="mono">' + esc(r.folio) + '</span> · recibido el ' + T.fmtD(r.creada) + '</p>'
+    + (T.ordenAbierta(r) ? T.lineaTiempo(r) : '')
+    + (r.diagnostico ? '<p><b>Diagnóstico:</b> ' + esc(r.diagnostico) + '</p>' : '')
+    + (r.lineas.length ? '<ul class="log">' + r.lineas.map(l => '<li><div class="row"><span>' + esc(l.desc) + (l.cant > 1 ? ' × ' + l.cant : '') + '</span><span class="spacer"></span><b>' + T.precioTxt(l.precio == null ? null : l.precio * l.cant) + '</b></div></li>').join('') + '<li><div class="row"><b>Total</b><span class="spacer"></span><b>' + T.fmtMoney(r.total) + '</b></div>' + (r.pagado ? '<span class="small muted">Pagado ' + T.fmtMoney(r.pagado) + ' · saldo ' + T.fmtMoney(saldo) + '</span>' : '') + '</li></ul>' : '')
+    + (r.estado === 'presupuesto' ? (decidiendo ? '<div class="stack tight"><label class="f" for="pq-m">¿Por qué no lo autorizas?<select id="pq-m" data-bind="pq.motivo">' + T.ents(T.RECHAZOS).map(([k, v]) => '<option value="' + k + '"' + (q.motivo === k ? ' selected' : '') + '>' + v + '</option>').join('') + '</select></label><div class="row"><button class="btn danger" type="button" data-act="p-autorizar" data-f="' + esc(r.folio) + '" data-v="no">No autorizo</button><button class="btn quiet" type="button" data-act="p-rechazo" data-f="">Volver</button></div></div>'
+      : '<div class="callout spot"><strong>Necesitamos tu autorización</strong>No reparamos nada sin tu visto bueno.</div><div class="row"><button class="btn primary" type="button" data-act="p-autorizar" data-f="' + esc(r.folio) + '" data-v="si">Autorizo la reparación</button><button class="btn" type="button" data-act="p-rechazo" data-f="' + esc(r.folio) + '">No autorizo</button></div>') : '')
+    + (r.garantiaHasta ? '<p>' + (r.garantiaHasta >= T.hoyISO() ? chip('ok', 'Garantía hasta ' + T.fmtD(r.garantiaHasta)) : chip('muted', 'Garantía vencida el ' + T.fmtD(r.garantiaHasta))) + '</p>' : '')
+    + '</article>';
+}
+function tarjetaCita(r){
+  const e = T.estadoDe(T.ESTADOS_CITA, r.estado);
+  return '<article class="card"><div class="row"><h3>Turno ' + esc(r.turno) + ' · ' + esc(T.fmtDia(r.fecha)) + ' · ' + esc(r.hora) + '</h3><span class="spacer"></span>' + chip(e[2], e[1]) + '</div>'
+    + '<p class="small muted">' + esc(T.MOTIVOS_CITA[r.motivo] || '') + ' · ' + esc(r.modalidad === 'domicilio' ? 'a domicilio' : r.lugar) + ' · folio <span class="mono">' + esc(r.folio) + '</span></p>'
+    + (r.estado === 'agendada' ? '<div class="row"><a class="btn sm" href="' + T.icsCita(r) + '" download="cita-' + esc(r.folio) + '.ics">Guardar en mi calendario</a><button class="btn sm quiet" type="button" data-act="p-cancelar" data-f="' + esc(r.folio) + '">Cancelar cita</button></div>' : '') + '</article>';
+}
+function formCita(){
+  const F = U.pf, dias = T.diasAgenda(), cta = U.pCuenta;
+  if (!F.fecha || !dias.includes(F.fecha)) F.fecha = dias[0] || '';
+  const hs = F.fecha ? T.horarios(F.fecha).filter(h => !h.pasada && h.libres > 0) : [];
+  const disp = (cta.cliente.dispositivos || []).map(d => d.marca + ' ' + d.modelo);
+  return '<form class="card stack tight" data-form="p-cita"><h3>Agendar una cita</h3><div class="grid2">'
+    + '<label class="f" for="pf-m">Motivo<select id="pf-m" data-bind="pf.motivo">' + T.ents(T.MOTIVOS_CITA).map(([k, v]) => '<option value="' + k + '"' + (F.motivo === k ? ' selected' : '') + '>' + v + '</option>').join('') + '</select></label>'
+    + (F.motivo === 'reparacion' ? '<label class="f" for="pf-p">¿Qué le pasa?<select id="pf-p" data-bind="pf.problema"><option value="">Elige…</option>' + T.PROBLEMAS.map(p => '<option value="' + p.id + '"' + (F.problema === p.id ? ' selected' : '') + '>' + esc(p.t) + '</option>').join('') + '</select></label>' : '')
+    + '<label class="f" for="pf-e">Equipo<input id="pf-e" list="pf-disp" data-bind="pf.equipo" value="' + esc(F.equipo) + '" placeholder="Marca y modelo"><datalist id="pf-disp">' + disp.map(d => '<option value="' + esc(d) + '">').join('') + '</datalist></label>'
+    + '<label class="f" for="pf-f">Día<select id="pf-f" data-bind="pf.fecha">' + dias.map(d => '<option value="' + d + '"' + (F.fecha === d ? ' selected' : '') + '>' + esc(T.fmtDia(d)) + '</option>').join('') + '</select></label>'
+    + '<label class="f" for="pf-h">Hora<select id="pf-h" data-bind="pf.hora"><option value="">Elige…</option>' + hs.map(h => '<option value="' + h.hora + '"' + (F.hora === h.hora ? ' selected' : '') + '>' + h.hora + ' · ' + h.libres + ' libres</option>').join('') + '</select></label></div>'
+    + '<label class="f" for="pf-n">Nota (opcional)<textarea id="pf-n" data-bind="pf.nota">' + esc(F.nota) + '</textarea></label>'
+    + (T.cfg().citas.confirmado ? '' : '<p class="small muted">Horario de citas ' + PC + '.</p>')
+    + '<div class="row"><button class="btn primary" type="submit"' + (F.enviando ? ' disabled' : '') + '>Agendar</button><button class="btn quiet" type="button" data-act="p-nueva">Cancelar</button></div></form>';
+}
+function vista(){
+  if (local() && !U.pCliente) return barra() + '<main>' + vEntrar() + '</main>';
+  const cta = U.pCuenta;
+  if (!cta || U.pCuentaDe !== U.pCliente){ cargarCuenta(); return barra() + '<main><div class="loading">Cargando tu cuenta…</div></main>'; }
+  const t = (v, txt, n) => '<button type="button" data-act="ptab" data-v="' + v + '"' + (U.pTab === v ? ' aria-current="page"' : '') + '>' + txt + (n ? ' <span class="badge">' + n + '</span>' : '') + '</button>';
+  const abiertas = cta.ordenes.filter(T.ordenAbierta), porAut = cta.ordenes.filter(o => o.estado === 'presupuesto').length;
+  const prox = cta.citas.filter(c => c.estado === 'agendada' && c.fecha >= T.hoyISO());
+  let body = '';
+  if (U.pTab === 'reparaciones') body = cta.ordenes.length ? abiertas.map(tarjetaOrden).join('') + (cta.ordenes.length > abiertas.length ? '<details><summary>Reparaciones entregadas (' + (cta.ordenes.length - abiertas.length) + ')</summary><div class="stack tight" style="margin-top:10px">' + cta.ordenes.filter(o => !T.ordenAbierta(o)).map(tarjetaOrden).join('') + '</div></details>' : '') : '<div class="card muted">Todavía no tienes reparaciones con nosotros.</div>';
+  if (U.pTab === 'citas') body = (U.pf ? formCita() : '<div><button class="btn primary" type="button" data-act="p-nueva">Agendar una cita</button></div>') + (cta.citas.length ? cta.citas.map(tarjetaCita).join('') : '<div class="card muted">Sin citas.</div>');
+  if (U.pTab === 'equipos'){
+    const ds = cta.cliente.dispositivos || [];
+    body = ds.length ? ds.map(d => '<article class="card"><div class="row"><h3>' + esc(d.marca + ' ' + d.modelo) + '</h3><span class="spacer"></span>' + (d.garantiaHasta ? (d.garantiaHasta >= T.hoyISO() ? chip('ok', 'Garantía hasta ' + T.fmtD(d.garantiaHasta)) : chip('muted', 'Garantía vencida')) : '') + '</div><dl class="kv"><dt>IMEI</dt><dd class="mono">' + esc(d.imei || '—') + '</dd>' + (d.color ? '<dt>Color</dt><dd>' + esc(d.color) + '</dd>' : '') + '<dt>Origen</dt><dd>' + esc(d.origen || '') + ' <span class="mono small">' + esc(d.ref || '') + '</span></dd></dl></article>').join('')
+      : '<div class="card muted">Tus equipos aparecen aquí cuando te entregamos una reparación o te vendemos un celular.</div>';
+  }
+  if (U.pTab === 'compras') body = cta.ventas.length ? cta.ventas.map(v => '<article class="card"><div class="row"><h3 class="mono" style="font-size:15px">' + esc(v.folio) + '</h3><span class="spacer"></span><b>' + T.fmtMoney(v.total) + '</b></div><p class="small muted">' + T.fmtD(v.fecha) + (v.credito ? ' · toma a cuenta ' + T.fmtMoney(v.credito) : '') + '</p><ul class="log">' + v.lineas.map(l => '<li><div class="row"><span>' + esc(l.desc) + (l.cant > 1 ? ' × ' + l.cant : '') + '</span><span class="spacer"></span>' + (l.garantiaHasta ? chip(l.garantiaHasta >= T.hoyISO() ? 'ok' : 'muted', 'Garantía ' + T.fmtD(l.garantiaHasta)) : '') + '</div></li>').join('') + '</ul></article>').join('') : '<div class="card muted">Sin compras.</div>';
+  return barra() + '<main><div class="portal"><div class="panel row"><div><div class="eyebrow">Hola</div><h2>' + esc(cta.cliente.nombre) + '</h2><p class="small muted">' + esc(T.telTxt(cta.cliente.tel)) + (prox.length ? ' · tu próxima cita: ' + esc(T.fmtDia(prox[prox.length - 1].fecha)) + ' a las ' + esc(prox[prox.length - 1].hora) : '') + '</p></div><span class="spacer"></span><button class="btn sm quiet" type="button" data-act="p-actualizar">Actualizar</button></div>'
+    + '<nav class="bigtabs" aria-label="Secciones">' + t('reparaciones', 'Mis reparaciones', porAut) + t('citas', 'Mis citas', prox.length) + t('equipos', 'Mis equipos') + t('compras', 'Mis compras') + '</nav>'
+    + body + '</div></main>';
+}
+let cargando = false;
+async function cargarCuenta(){
+  if (cargando) return; cargando = true;
+  try { U.pCuenta = await T.miCuenta(U.pCliente); U.pCuentaDe = U.pCliente; if (!U.pCuenta) T.toast('No encontramos tu cuenta.', 'crit'); }
+  catch (e) { T.toast('No se pudo cargar tu cuenta: ' + e.message, 'crit'); }
+  cargando = false; T.scheduleRender();
+}
+const refrescar = () => { U.pCuentaDe = null; cargarCuenta(); };
+
+T.registrar('portal', {
+  barra, vista, acceso:'cliente',
+  estado:{ pCliente:'', pElegido:'', pTab:'reparaciones', pCuenta:null, pCuentaDe:null, pq:{ folio:'', motivo:'precio' }, pf:null },
+  acciones:{
+    ptab(d){ U.pTab = d.v; T.scheduleRender(); },
+    'p-salir'(){ U.pCliente = ''; U.pElegido = ''; U.pCuenta = null; T.scheduleRender(); },
+    'p-actualizar'(){ refrescar(); },
+    'p-rechazo'(d){ U.pq = { folio:d.f || '', motivo:'precio' }; T.scheduleRender(); },
+    async 'p-autorizar'(d){
+      try { await T.autorizarFuera(d.f, U.pCuenta.cliente.tel, d.v, d.v === 'no' ? U.pq.motivo : '', 'portal'); U.pq = { folio:'', motivo:'precio' }; T.toast(d.v === 'si' ? 'Gracias. Ya tenemos tu autorización.' : 'Registramos que no autorizas; te devolvemos tu equipo.'); }
+      catch (e) { T.toast(e.message, 'crit'); }
+      refrescar();
+    },
+    async 'p-cancelar'(d){
+      if (!confirm('¿Cancelar esta cita?')) return;
+      try { await T.cancelarFuera(d.f, U.pCuenta.cliente.tel, 'cliente'); T.toast('Cita cancelada.'); await T.cargarOcupacion(); }
+      catch (e) { T.toast(e.message, 'crit'); }
+      refrescar();
+    },
+    'p-nueva'(){ U.pf = U.pf ? null : { motivo:'reparacion', problema:'', equipo:'', fecha:'', hora:'', nota:'', enviando:false }; T.scheduleRender(); }
+  },
+  formularios:{
+    'p-entrar'(){ if (!S.clientes[U.pElegido]) return; U.pCliente = U.pElegido; U.pTab = 'reparaciones'; U.pCuenta = null; T.scheduleRender(); },
+    async 'p-cita'(){
+      const F = U.pf, c = U.pCuenta.cliente;
+      if (!F.hora){ T.toast('Elige la hora.', 'warn'); return; }
+      F.enviando = true; T.scheduleRender();
+      try {
+        const r = await T.agendar({ fecha:F.fecha, hora:F.hora, motivo:F.motivo, modalidad:'cafeteria', nota:F.nota.trim(), origen:'portal', clienteId:local() ? U.pCliente : null,
+          cotizacion:F.problema || F.equipo ? { tipo:F.motivo === 'venta' ? 'venta' : 'reparacion', problema:F.problema || null, equipo:F.equipo.trim() } : null,
+          contacto:{ nombre:c.nombre, tel:c.tel, correo:c.correo } });
+        U.pf = null; T.toast('Cita agendada: turno ' + r.turno + ', ' + T.fmtDia(r.fecha).toLowerCase() + ' a las ' + r.hora + '.');
+        await T.cargarOcupacion();
+      } catch (e) { F.enviando = false; T.toast(e.message, 'crit'); }
+      refrescar();
+    }
+  }
+});
+})();
 
 </script>
 <script>

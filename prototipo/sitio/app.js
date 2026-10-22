@@ -251,13 +251,7 @@ function vGarantia(){
 }
 
 /* ---------- consulta por folio y celular ---------- */
-const PASOS_ORDEN = [['recibido','Recibimos tu equipo'],['diagnostico','Lo estamos revisando'],['presupuesto','Te enviamos el presupuesto'],['autorizado','Autorizaste la reparación'],['reparacion','Lo estamos reparando'],['listo','Listo para entregar'],['entregado','Entregado']];
-function lineaTiempo(r){
-  const orden = PASOS_ORDEN.map(p => p[0]);
-  const actual = r.estado === 'espera' ? 'reparacion' : r.estado === 'rechazado' ? 'presupuesto' : r.estado;
-  const i = orden.indexOf(actual);
-  return '<ol class="timeline">' + PASOS_ORDEN.map(([k, t], j) => '<li class="' + (j < i ? 'on' : j === i ? 'now' : '') + '"><div><b>' + esc(k === 'reparacion' && r.estado === 'espera' ? 'Esperando una refacción' : k === 'presupuesto' && r.estado === 'rechazado' ? 'No autorizaste la reparación' : t) + '</b>' + (j === i && r.promesa && r.estado !== 'entregado' ? '<span>Fecha estimada: ' + esc(T.fmtD(r.promesa)) + '</span>' : '') + '</div></li>').join('') + '</ol>';
-}
+const lineaTiempo = T.lineaTiempo;
 function vResultado(){
   const q = U.q, r = q.res; if (!r) return '';
   if (r.tipo === 'cita'){

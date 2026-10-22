@@ -172,13 +172,9 @@ function accesoOk(){
   if (!Auth.session || !Auth.perfil) return false;
   return acceso() === 'interno' ? esInterno() : (rolCuenta() === 'cliente' && !!Auth.perfil.cliente_id);
 }
+/* Afuera (sitio y portal) solo se leen tablas públicas; lo del cliente llega por ts_mi_cuenta. */
 const PUBLICAS = ['config','modelos','tarifas','productos','existencias'];
-function colsPara(){
-  const a = acceso();
-  if (a === 'publico' || !accesoOk()) return PUBLICAS.slice();
-  if (a === 'cliente') return PUBLICAS.concat(['clientes','citas','ordenes','ventas']);
-  return COLS.slice();
-}
+function colsPara(){ return acceso() === 'interno' && accesoOk() ? COLS.slice() : PUBLICAS.slice(); }
 async function cargar(){
   const sb = Store.sb; COLS.forEach(c => { S[c] = {}; Store.loaded[c] = false; }); S.perfiles = {};
   const cols = colsPara();
@@ -579,6 +575,23 @@ function vistaCita(c){
   const ord = c.ordenId && S.ordenes[c.ordenId];
   return { tipo:'cita', folio:c.folio, estado:c.estado, fecha:c.fecha, hora:c.hora, turno:c.turno, lugar:c.lugar, motivo:c.motivo, modalidad:c.modalidad, cotizacion:c.cotizacion, nombre:(c.contacto.nombre || '').split(' ')[0], orden:ord ? ord.folio : null };
 }
+/* Lo que el cliente ve de su cuenta en el portal: nunca notas internas, costos ni códigos. */
+function vistaCuenta(cid){
+  const c = S.clientes[cid]; if (!c) return null;
+  const porFecha = (a, b) => (b.creada || b.fecha || '').localeCompare(a.creada || a.fecha || '');
+  return { cliente:{ nombre:c.nombre, tel:c.tel, correo:c.correo || '', dispositivos:(c.dispositivos || []).map(d => ({ marca:d.marca, modelo:d.modelo, imei:d.imei, color:d.color, origen:d.origen, ref:d.ref, garantiaHasta:d.garantiaHasta || null })) },
+    ordenes:vals(S.ordenes).filter(o => o.clienteId === cid).map(vistaOrden).sort(porFecha),
+    citas:vals(S.citas).filter(x => x.clienteId === cid).map(vistaCita).sort(porFecha),
+    ventas:vals(S.ventas).filter(v => v.clienteId === cid).map(v => ({ folio:v.folio, fecha:v.fecha, total:v.total, credito:v.credito || 0, lineas:(v.lineas || []).map(l => ({ desc:l.desc, cant:l.cant, precio:l.precio, garantiaHasta:l.garantiaHasta || null })) })).sort(porFecha) };
+}
+async function miCuenta(cid){ if (Store.sb) return rpc('ts_mi_cuenta', {}); return vistaCuenta(cid); }
+/* Línea de tiempo de una reparación, igual en el sitio y en el portal. */
+const PASOS_ORDEN = [['recibido','Recibimos tu equipo'],['diagnostico','Lo estamos revisando'],['presupuesto','Te enviamos el presupuesto'],['autorizado','Autorizaste la reparación'],['reparacion','Lo estamos reparando'],['listo','Listo para entregar'],['entregado','Entregado']];
+function lineaTiempo(r){
+  const actual = r.estado === 'espera' ? 'reparacion' : r.estado === 'rechazado' ? 'presupuesto' : r.estado;
+  const i = PASOS_ORDEN.findIndex(p => p[0] === actual);
+  return '<ol class="timeline">' + PASOS_ORDEN.map(([k, t], j) => '<li class="' + (j < i ? 'on' : j === i ? 'now' : '') + '"><div><b>' + esc(k === 'reparacion' && r.estado === 'espera' ? 'Esperando una refacción' : k === 'presupuesto' && r.estado === 'rechazado' ? 'No autorizaste la reparación' : t) + '</b>' + (j === i && r.promesa && r.estado !== 'entregado' ? '<span>Fecha estimada: ' + esc(fmtD(r.promesa)) + '</span>' : '') + '</div></li>').join('') + '</ol>';
+}
 function telDe(x){ const cl = S.clientes[x.clienteId]; return digitos((cl && cl.tel) || (x.contacto && x.contacto.tel)); }
 function buscarFolio(folio, tel){
   const f = String(folio || '').trim().toUpperCase(), t = digitos(tel);
@@ -649,7 +662,7 @@ const LINKS = window.TS_LINKS || {};
 function registrar(nombre, app){ APPS[nombre] = app; if (app.estado) Object.keys(app.estado).forEach(k => { if (!(k in U)) U[k] = clone(app.estado[k]); }); }
 const actual = () => APPS[U.app] || APPS[Object.keys(APPS)[0]];
 
-let queued = false;
+let queued = false, ultimoDrawer = '';
 function scheduleRender(){ if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; render(); }); }
 function render(){
   const app = actual(); if (!app) return;
@@ -663,7 +676,10 @@ function render(){
   else body = app.vista();
   $('#app').innerHTML = body + (U.toast ? '<div class="toast ' + (U.toast.k || '') + '" role="status">' + esc(U.toast.t) + '</div>' : '');
   if (fid){ const el = document.getElementById(fid); if (el){ try { el.focus({ preventScroll:true }); if (s0 != null && el.setSelectionRange) el.setSelectionRange(s0, s1); } catch (e) {} } }
-  const db2 = document.querySelector('.drawer-body'); if (db2 && dScroll) db2.scrollTop = dScroll;
+  /* El panel lateral conserva su scroll solo si sigue mostrando lo mismo. */
+  const dk = U.drawer ? U.drawer.kind + ':' + (U.drawer.id || '') : '';
+  const db2 = document.querySelector('.drawer-body'); if (db2 && dScroll && dk === ultimoDrawer) db2.scrollTop = dScroll;
+  ultimoDrawer = dk;
   if (app.despues) app.despues();
 }
 let toastTimer = null;
@@ -737,7 +753,7 @@ window.TS = {
   verCostos, costo, montoLineas, sinPrecio, utilidad, bajoMargen, ex, setEx, prodNombre,
   totalOrden, pagadoOrden, saldoOrden, ordenAbierta, equipoTxt, hist, crearOrden, ordenEdit, autorizar, apartarOrden, liberarOrden, descontarOrden, entregar, reclamoGarantia,
   garantias, registrarVenta, compraVerificada, aceptarCompra, caja,
-  consultar, autorizarFuera, cancelarFuera, icsCita, logo, icono,
+  consultar, autorizarFuera, cancelarFuera, vistaCuenta, miCuenta, lineaTiempo, icsCita, logo, icono,
   registrar, scheduleRender, toast, imprimir, barra, start, guardarPerfil, esInterno, rpc
 };
 })();
