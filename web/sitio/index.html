@@ -1,0 +1,1486 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1B2B">
+<title>Tecno-Spot · Reparación de celulares</title>
+<meta name="description" content="Reparación de celulares en la cafetería de Tecmilenio: cotiza en línea y agenda tu cita con turno.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Tecno-Spot · estilos compartidos por el sitio, el portal y la consola.
+   Colores de marca provisionales (por confirmar): azul noche, verde azulado y amarillo "spot". */
+:root{
+  --ground:#F4F6F8; --surface:#FFFFFF; --sunk:#EBEFF3; --ink:#0E1A26; --muted:#5A6977; --rule:#D5DDE5; --rule-strong:#B6C3CF;
+  --brand:#0B1B2B; --accent:#0A7C86; --accent-ink:#FFFFFF; --accent-soft:#D9F0F1; --sky:#1FA9B6; --spot:#FFB020; --spot-ink:#3A2600; --spot-soft:#FFF1D6;
+  --bar:#0B1B2B; --bar-ink:#EEF4F8; --bar-muted:#9FB2C2; --bar-hi:rgba(255,255,255,.12);
+  --ok:#1D7348; --ok-soft:#DDF1E6; --warn:#8A5A00; --warn-soft:#FBEFD6; --crit:#B42318; --crit-soft:#FBE3E0;
+  --scrim:rgba(5,16,26,.42);
+  --sans:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --display:"Sora","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#081119; --surface:#0F1C28; --sunk:#0B1620; --ink:#E4ECF2; --muted:#93A5B5; --rule:#203242; --rule-strong:#33495C;
+    --brand:#BFE3E6; --accent:#45C2CC; --accent-ink:#04191C; --accent-soft:#11343A; --sky:#62D0D9; --spot:#FFB020; --spot-ink:#FFD58A; --spot-soft:#33270C;
+    --bar:#06101A; --bar-ink:#E4ECF2; --bar-muted:#8DA1B3; --bar-hi:rgba(255,255,255,.10);
+    --ok:#5CC48F; --ok-soft:#10301F; --warn:#E9B65C; --warn-soft:#33260E; --crit:#F2877C; --crit-soft:#3A1614;
+    --scrim:rgba(0,0,0,.58);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#081119; --surface:#0F1C28; --sunk:#0B1620; --ink:#E4ECF2; --muted:#93A5B5; --rule:#203242; --rule-strong:#33495C;
+  --brand:#BFE3E6; --accent:#45C2CC; --accent-ink:#04191C; --accent-soft:#11343A; --sky:#62D0D9; --spot:#FFB020; --spot-ink:#FFD58A; --spot-soft:#33270C;
+  --bar:#06101A; --bar-ink:#E4ECF2; --bar-muted:#8DA1B3; --bar-hi:rgba(255,255,255,.10);
+  --ok:#5CC48F; --ok-soft:#10301F; --warn:#E9B65C; --warn-soft:#33260E; --crit:#F2877C; --crit-soft:#3A1614;
+  --scrim:rgba(0,0,0,.58);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 16px/1.5 var(--sans);}
+h1,h2,h3,h4{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15;letter-spacing:-.01em}
+p{margin:0}
+a{color:var(--accent)}
+button{font:inherit}
+:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* Marca */
+.logo{display:inline-flex;align-items:center;gap:8px;color:inherit}
+.logo .isotipo{width:30px;height:30px;flex:none}
+.logo .wordmark{font:700 19px/1 var(--display);letter-spacing:-.02em;white-space:nowrap}
+.logo .wordmark span{color:var(--spot)}
+.logo.grande .isotipo{width:44px;height:44px}
+.logo.grande .wordmark{font-size:28px}
+.ico{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* Barra superior */
+.top{position:sticky;top:0;z-index:20;background:var(--bar);color:var(--bar-ink);padding-top:env(safe-area-inset-top,0px)}
+.top-in{max-width:1240px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+.brand .tool{font:600 13px/1.1 var(--sans);color:var(--bar-muted);border-left:1px solid var(--bar-muted);padding-left:12px}
+.topnav{display:flex;gap:2px;flex-wrap:wrap}
+.topnav a,.topnav button{background:transparent;border:0;color:var(--bar-muted);font:600 14.5px/1 var(--sans);padding:10px 10px;border-radius:6px;cursor:pointer;text-decoration:none}
+.topnav a:hover,.topnav button:hover{color:var(--bar-ink)}
+.topnav [aria-current="page"]{background:var(--bar-hi);color:var(--bar-ink)}
+.mode{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pill{font:500 11px/1 var(--mono);padding:5px 8px;border-radius:999px;border:1px solid var(--bar-muted);color:var(--bar-ink);white-space:nowrap}
+.pill.solid{background:var(--bar-hi);border-color:transparent}
+.pill.live::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#5CC48F;margin-right:6px;vertical-align:0}
+@media (max-width:640px){.top{position:static}.top-in{gap:6px 12px}.mode{margin-left:0}}
+
+main{max-width:1240px;margin:0 auto;padding-inline:16px;padding-block:22px 72px}
+.stack{display:grid;gap:18px;align-content:start}
+.stack.tight{gap:10px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.spacer{flex:1}
+.muted{color:var(--muted)}
+.small{font-size:13.5px}
+.mono{font-family:var(--mono);font-size:12.5px}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+
+/* Botones y campos */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:600 15px/1.1 var(--sans);padding:10px 15px;border-radius:8px;border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink);cursor:pointer;min-height:42px;text-decoration:none}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.spot{background:var(--spot);border-color:var(--spot);color:#2A1C00}
+.btn.danger{color:var(--crit);border-color:var(--crit);background:transparent}
+.btn.quiet{border-color:transparent;background:transparent;color:var(--accent);padding-inline:8px}
+.btn.onbar{background:transparent;border-color:var(--bar-muted);color:var(--bar-ink)}
+.btn.sm{padding:6px 10px;font-size:13.5px;min-height:34px}
+.btn.lg{padding:14px 22px;font-size:17px;min-height:52px;border-radius:10px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.linkbtn{background:none;border:0;padding:0;color:var(--ink);font:600 15px/1.3 var(--sans);text-align:left;cursor:pointer;text-decoration:underline;text-decoration-color:var(--rule-strong);text-underline-offset:3px}
+.linkbtn:hover{text-decoration-color:var(--accent);color:var(--accent)}
+label.f{display:grid;gap:5px;font:600 13.5px/1.2 var(--sans);color:var(--muted);min-width:0}
+input,select,textarea{font:400 16px/1.3 var(--sans);color:var(--ink);background:var(--surface);border:1px solid var(--rule-strong);border-radius:8px;padding:9px 11px;min-height:42px;width:100%;min-width:0}
+input[type=checkbox],input[type=radio]{width:18px;height:18px;min-height:0;accent-color:var(--accent);flex:none;margin:0}
+textarea{min-height:84px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.check{display:flex;gap:9px;align-items:flex-start;font-size:15px;line-height:1.35;cursor:pointer}
+.check input{margin-top:1px}
+.err{color:var(--crit);font-size:14px;font-weight:600}
+
+/* Marcas de estado */
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 var(--sans);padding:5px 9px;border-radius:999px;white-space:nowrap}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.crit{background:var(--crit-soft);color:var(--crit)}
+.chip.muted{background:var(--sunk);color:var(--muted)}
+.chip.info{background:var(--accent-soft);color:var(--accent)}
+.tag{display:inline-block;font:500 11px/1 var(--mono);padding:4px 6px 3px;border-radius:4px;white-space:nowrap;vertical-align:1px}
+.tag.pc{border:1px dashed var(--muted);color:var(--muted)}
+.tag.demo{background:var(--sunk);color:var(--muted)}
+.tag.est{background:var(--warn-soft);color:var(--warn)}
+
+/* Superficies */
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px}
+.panel h3{font-size:17px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:16px;display:grid;gap:10px;align-content:start}
+.card.attn{border-color:var(--crit);box-shadow:inset 4px 0 0 var(--crit)}
+.card h3{font-size:17px}
+.note{font-size:14px;color:var(--muted);border-left:3px solid var(--rule-strong);padding:2px 0 2px 10px}
+.callout{border-radius:10px;padding:12px 14px;font-size:15px;display:grid;gap:4px}
+.callout.warn{background:var(--warn-soft)}
+.callout.warn strong{color:var(--warn)}
+.callout.crit{background:var(--crit-soft)}
+.callout.crit strong{color:var(--crit)}
+.callout.info{background:var(--accent-soft)}
+.callout.spot{background:var(--spot-soft)}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:5px 14px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;min-width:0}
+
+/* Tablas */
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:12px}
+table.t{border-collapse:collapse;width:100%;font-size:14.5px}
+table.t th{background:var(--sunk);text-align:left;font:600 11px/1.2 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:9px 10px;white-space:nowrap}
+table.t td{padding:10px;border-top:1px solid var(--rule);vertical-align:top}
+table.t td.num,table.t th.num{text-align:right}
+table.t td.mono{white-space:nowrap}
+table.t tfoot td{font-weight:700;background:var(--sunk)}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.log li{border-top:1px solid var(--rule);padding:10px 0;display:grid;gap:3px;font-size:15px}
+.log li:first-child{border-top:0}
+.log .h{font:500 12px var(--mono);color:var(--muted)}
+
+/* Indicadores */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:grid;gap:6px;align-content:start}
+.tile.lead{border-color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+.tile .lbl{font:600 11.5px/1.2 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.tile .val{font:700 30px/1 var(--display);font-variant-numeric:tabular-nums}
+.tile .sub{font-size:13.5px;color:var(--muted)}
+
+/* Línea de tiempo de una reparación */
+.timeline{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.timeline li{display:grid;grid-template-columns:22px 1fr;gap:10px;padding-bottom:14px;position:relative}
+.timeline li::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--rule-strong);margin:5px 0 0 5px}
+.timeline li::after{content:"";position:absolute;left:10.5px;top:20px;bottom:0;width:1px;background:var(--rule)}
+.timeline li:last-child::after{display:none}
+.timeline li.on::before{background:var(--accent)}
+.timeline li.now::before{background:var(--spot);box-shadow:0 0 0 4px var(--spot-soft)}
+.timeline b{display:block;font:600 15px/1.3 var(--sans)}
+.timeline span{font-size:13.5px;color:var(--muted)}
+
+/* Pasos */
+.stagebar{display:flex;gap:4px;flex-wrap:wrap}
+.stagebar span{font:600 12.5px/1 var(--sans);padding:6px 9px;border-radius:6px;background:var(--sunk);color:var(--muted)}
+.stagebar span.on{background:var(--accent);color:var(--accent-ink)}
+.stagebar span.lost{background:var(--crit);color:#fff}
+
+/* Acceso */
+.login{max-width:440px;margin:40px auto;display:grid;gap:16px;text-align:left}
+.login h1{font-size:24px}
+
+/* Panel lateral y avisos */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:40}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(720px,100%);background:var(--ground);z-index:41;display:flex;flex-direction:column;box-shadow:-16px 0 40px rgba(0,0,0,.22);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer-head{padding:16px 18px;border-bottom:1px solid var(--rule);background:var(--surface);display:flex;gap:12px;align-items:flex-start}
+.drawer-head h2{font-size:21px}
+.drawer-body{overflow:auto;padding:18px;display:grid;gap:18px;align-content:start;flex:1}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--ground);padding:11px 16px;border-radius:8px;font:600 15px/1.3 var(--sans);max-width:min(560px,calc(100% - 32px));box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast.crit{background:var(--crit);color:#fff}
+.toast.warn{background:var(--warn);color:#fff}
+.loading{padding:80px 0;text-align:center;color:var(--muted)}
+.foot-sys{max-width:1240px;margin:0 auto;padding:0 16px 28px;font-size:13px;color:var(--muted)}
+
+/* Hojas imprimibles */
+#print{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  #app,.toast{display:none!important}
+  #print{display:block;font:12.5px/1.45 var(--sans);color:#000}
+  #print h1{font:700 20px/1.2 var(--display);margin:0 0 4px}
+  #print h2{font:700 14px/1.2 var(--display);margin:14px 0 6px}
+  #print table{border-collapse:collapse;width:100%}
+  #print td,#print th{border:1px solid #999;padding:4px 6px;text-align:left;vertical-align:top}
+  #print .firma{margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:40px}
+  #print .firma div{border-top:1px solid #000;padding-top:4px;text-align:center}
+  #print .pie{margin-top:14px;font-size:11px;color:#333}
+}
+/* Sitio público: asistente paso a paso, tienda y consulta por folio. */
+.hero{background:var(--bar);color:var(--bar-ink);padding:26px 16px 64px;background-image:radial-gradient(circle at 88% 0%,rgba(255,176,32,.20),transparent 42%),radial-gradient(circle at 0% 100%,rgba(31,169,182,.22),transparent 45%)}
+.hero.corto{padding-bottom:58px}
+.hero-in{max-width:980px;margin:0 auto;display:grid;gap:10px}
+.hero .eyebrow{color:var(--spot)}
+.hero .lede{font-size:18px;line-height:1.45;max-width:680px;color:var(--bar-ink)}
+main.sitio{max-width:980px;padding-top:0}
+.hero + main.sitio{margin-top:-46px}
+.seccion{display:grid;gap:14px;padding-top:30px}
+.seccion h1{font-size:clamp(26px,4.5vw,36px)}
+.seccion h2{font-size:22px}
+
+/* Asistente */
+.asistente{background:var(--surface);border:1px solid var(--rule);border-radius:18px;padding:20px;display:grid;gap:18px;box-shadow:0 14px 40px rgba(5,16,26,.10);scroll-margin-top:12px}
+@media (min-width:720px){.asistente{padding:26px 28px}}
+.paso-h{display:grid;gap:6px}
+.paso-h h1,.paso-h h2{font-size:clamp(25px,4.6vw,34px)}
+.stepper{list-style:none;margin:0;padding:0;display:flex;gap:6px;flex-wrap:wrap}
+.stepper li>*{display:flex;align-items:center;gap:7px;padding:6px 10px 6px 6px;border-radius:999px;background:var(--sunk);color:var(--muted);font:600 13.5px/1 var(--sans);border:0}
+.stepper li b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--surface);font:700 12px/1 var(--sans)}
+.stepper li.hecho>*{background:var(--accent-soft);color:var(--accent);cursor:pointer}
+.stepper li.hecho b{background:var(--accent);color:var(--accent-ink)}
+.stepper li.actual>*{background:var(--spot);color:#2A1C00}
+.stepper li.actual b{background:#2A1C00;color:var(--spot)}
+@media (max-width:560px){.stepper li:not(.actual) span{display:none}.stepper li:not(.actual)>*{padding-right:6px}}
+.resumen{display:flex;flex-wrap:wrap;gap:8px}
+.resumen .r{display:inline-flex;gap:6px;align-items:center;background:var(--sunk);border-radius:999px;padding:6px 11px 6px 8px;font:600 14px/1.2 var(--sans)}
+.resumen .ico{width:18px;height:18px;color:var(--accent)}
+
+.opciones{display:grid;gap:10px}
+.opciones.prob{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.opciones.marcas{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.opciones.modelos{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));max-height:440px;overflow:auto;padding:2px}
+.opciones.motivos{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.opcion{display:grid;gap:5px;align-content:start;text-align:left;background:var(--surface);border:1.5px solid var(--rule);border-radius:14px;padding:14px;cursor:pointer;color:var(--ink);transition:border-color .12s,transform .12s}
+.opcion:hover{border-color:var(--accent);transform:translateY(-1px)}
+.opcion[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opcion .ico{width:30px;height:30px;color:var(--accent);margin-bottom:4px}
+.opcion b{font:700 16.5px/1.25 var(--display)}
+.opcion span{font-size:14px;color:var(--muted);line-height:1.35}
+.opcion.urgente .ico{color:var(--sky)}
+.opcion.marca{padding:16px 14px}
+.opcion.marca b{font-size:18px}
+.opcion.modelo{padding:11px 12px;border-radius:10px}
+.opcion.modelo b{font:600 15.5px/1.2 var(--sans)}
+.opcion.modelo span{font-size:12.5px}
+label.buscar{flex:1 1 280px;max-width:420px}
+.manual{max-width:460px}
+.tip{display:flex;gap:10px;align-items:flex-start;background:var(--sunk);border-radius:10px;padding:10px 12px;font-size:14.5px}
+.tip .ico{width:20px;height:20px;color:var(--accent);margin-top:1px}
+.tip.urgente{background:var(--warn-soft)}
+.tip.urgente .ico{color:var(--warn)}
+.volver{border-top:1px solid var(--rule);padding-top:12px}
+
+/* Cotización */
+.cotiz{display:grid;gap:16px}
+.cotiz-h{display:flex;gap:14px;align-items:center}
+.cotiz-h h3{font-size:21px}
+.ico.grande{width:46px;height:46px;padding:9px;border-radius:12px;background:var(--accent-soft);color:var(--accent);box-sizing:content-box}
+fieldset.ops{border:0;margin:0;padding:0;display:grid;gap:8px;min-width:0}
+fieldset.ops legend{font:700 16px/1.3 var(--display);margin-bottom:8px;padding:0}
+.op{display:flex;gap:12px;align-items:center;border:1.5px solid var(--rule);border-radius:12px;padding:12px 14px;cursor:pointer;background:var(--surface)}
+.op:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.op-t{display:grid;gap:2px;flex:1;min-width:0}
+.op-t b{font:600 16px/1.25 var(--sans)}
+.op-p{font:700 18px/1 var(--display);white-space:nowrap;text-align:right}
+.sigue{background:var(--sunk);border-radius:12px;padding:14px 16px}
+.sigue h4{font-size:15px;margin-bottom:6px}
+.sigue ol{margin:0;padding-left:20px;display:grid;gap:4px}
+.req h4{font-size:16px;margin-bottom:6px}
+.req ul,.lista{margin:0;padding-left:20px;display:grid;gap:4px}
+
+/* Cita */
+.dias{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px}
+.dia{flex:none;display:grid;gap:3px;text-align:left;min-width:112px;border:1.5px solid var(--rule);border-radius:12px;padding:10px 12px;background:var(--surface);color:var(--ink);cursor:pointer}
+.dia b{font:700 15px/1.1 var(--display);text-transform:capitalize}
+.dia span{font-size:12.5px;color:var(--muted)}
+.dia[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.horas{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.hora{border:1.5px solid var(--rule);border-radius:10px;padding:10px 6px;background:var(--surface);color:var(--ink);font:600 15.5px/1 var(--sans);cursor:pointer;display:grid;gap:3px;justify-items:center}
+.hora span{font-size:11px;font-weight:500;color:var(--muted)}
+.hora[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.dia:disabled,.hora:disabled{opacity:.45;cursor:not-allowed;text-decoration:line-through}
+.dia:not(:disabled):hover,.hora:not(:disabled):hover{border-color:var(--accent)}
+
+/* Turno */
+.ticket{display:grid;grid-template-columns:auto 1fr;gap:0;border-radius:16px;overflow:hidden;border:1.5px solid var(--spot)}
+.ticket-turno{background:var(--spot);color:#2A1C00;display:grid;place-content:center;text-align:center;padding:18px 26px}
+.ticket-turno span{font:600 13px/1 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.ticket-turno b{font:800 64px/1 var(--display)}
+.ticket-info{padding:16px 18px;display:grid;gap:6px;align-content:center;background:var(--spot-soft)}
+.ticket-info h3{font-size:22px}
+.ticket-info .grande{font-size:18px;text-transform:capitalize}
+.ticket-info p{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ticket-info .ico{width:18px;height:18px}
+.folio{font-size:15px;font-weight:600;background:var(--surface);padding:3px 7px;border-radius:6px;user-select:all}
+@media (max-width:480px){.ticket{grid-template-columns:1fr}.ticket-turno{padding:14px}}
+.card h4{font-size:16px}
+
+/* Secciones de inicio */
+.como{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.como li{display:grid;gap:6px;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:16px}
+.como .ico{color:var(--accent);width:28px;height:28px}
+.como b{font:700 16px/1.25 var(--display)}
+.como span{font-size:14.5px;color:var(--muted)}
+.servicios{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.servicio{display:grid;gap:6px;text-align:left;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:16px;cursor:pointer;color:var(--ink)}
+.servicio:hover{border-color:var(--accent)}
+.servicio .ico{color:var(--accent);width:28px;height:28px}
+.servicio b{font:700 16.5px/1.25 var(--display)}
+.servicio span{font-size:14.5px;color:var(--muted)}
+
+/* Tienda */
+.filtros{display:flex;gap:8px;flex-wrap:wrap}
+.filtro{border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 13px;font:600 14px/1 var(--sans);cursor:pointer}
+.filtro[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--ground)}
+.productos{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.producto{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:16px;display:grid;gap:8px;align-content:start}
+.producto h3{font-size:17px}
+.precio{font:700 22px/1.1 var(--display)}
+
+/* Consulta */
+.consulta-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;align-items:end}
+details summary{cursor:pointer;font-weight:600}
+
+/* Pie */
+.pie{background:var(--surface);border-top:1px solid var(--rule);margin-top:20px}
+.pie-in{max-width:980px;margin:0 auto;padding:24px 16px 36px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.pie .logo{color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="application/json" id="datos">{"config":{"general":{"empresa":{"nombre":"Tecno-Spot","sucursal":"Tecmilenio","lugar":"Cafetería de Tecmilenio","lugarFrase":"la cafetería de Tecmilenio"},"garantias":{"pantalla":90,"bateria":90,"carga":60,"bocina":60,"microfono":60,"camara":60,"tapa":30,"botones":60,"software":15,"liberacion":null,"mantenimiento":15,"humedad":null},"garantiaEquipo":{"nuevo":365,"seminuevo":90},"domicilio":{"activo":true,"costo":null,"zona":null},"demo":true}},"modelos":{"apple-iphone-17-pro-max":{"marca":"Apple","modelo":"iPhone 17 Pro Max","gama":"alta","orden":0},"apple-iphone-17-pro":{"marca":"Apple","modelo":"iPhone 17 Pro","gama":"alta","orden":1},"apple-iphone-air":{"marca":"Apple","modelo":"iPhone Air","gama":"alta","orden":2},"apple-iphone-17":{"marca":"Apple","modelo":"iPhone 17","gama":"alta","orden":3},"apple-iphone-16e":{"marca":"Apple","modelo":"iPhone 16e","gama":"media","orden":4},"apple-iphone-16-pro-max":{"marca":"Apple","modelo":"iPhone 16 Pro Max","gama":"alta","orden":5},"apple-iphone-16-pro":{"marca":"Apple","modelo":"iPhone 16 Pro","gama":"alta","orden":6},"apple-iphone-16-plus":{"marca":"Apple","modelo":"iPhone 16 Plus","gama":"alta","orden":7},"apple-iphone-16":{"marca":"Apple","modelo":"iPhone 16","gama":"alta","orden":8},"apple-iphone-15-pro-max":{"marca":"Apple","modelo":"iPhone 15 Pro Max","gama":"alta","orden":9},"apple-iphone-15-pro":{"marca":"Apple","modelo":"iPhone 15 Pro","gama":"alta","orden":10},"apple-iphone-15-plus":{"marca":"Apple","modelo":"iPhone 15 Plus","gama":"alta","orden":11},"apple-iphone-15":{"marca":"Apple","modelo":"iPhone 15","gama":"alta","orden":12},"apple-iphone-14-pro-max":{"marca":"Apple","modelo":"iPhone 14 Pro Max","gama":"alta","orden":13},"apple-iphone-14-pro":{"marca":"Apple","modelo":"iPhone 14 Pro","gama":"alta","orden":14},"apple-iphone-14-plus":{"marca":"Apple","modelo":"iPhone 14 Plus","gama":"media","orden":15},"apple-iphone-14":{"marca":"Apple","modelo":"iPhone 14","gama":"media","orden":16},"apple-iphone-se-3-generacion":{"marca":"Apple","modelo":"iPhone SE (3.ª generación)","gama":"entrada","orden":17},"apple-iphone-13-pro-max":{"marca":"Apple","modelo":"iPhone 13 Pro Max","gama":"media","orden":18},"apple-iphone-13-pro":{"marca":"Apple","modelo":"iPhone 13 Pro","gama":"media","orden":19},"apple-iphone-13":{"marca":"Apple","modelo":"iPhone 13","gama":"media","orden":20},"apple-iphone-13-mini":{"marca":"Apple","modelo":"iPhone 13 mini","gama":"media","orden":21},"apple-iphone-12-pro-max":{"marca":"Apple","modelo":"iPhone 12 Pro Max","gama":"media","orden":22},"apple-iphone-12-pro":{"marca":"Apple","modelo":"iPhone 12 Pro","gama":"media","orden":23},"apple-iphone-12":{"marca":"Apple","modelo":"iPhone 12","gama":"media","orden":24},"apple-iphone-12-mini":{"marca":"Apple","modelo":"iPhone 12 mini","gama":"media","orden":25},"apple-iphone-se-2-generacion":{"marca":"Apple","modelo":"iPhone SE (2.ª generación)","gama":"entrada","orden":26},"apple-iphone-11-pro-max":{"marca":"Apple","modelo":"iPhone 11 Pro Max","gama":"media","orden":27},"apple-iphone-11-pro":{"marca":"Apple","modelo":"iPhone 11 Pro","gama":"media","orden":28},"apple-iphone-11":{"marca":"Apple","modelo":"iPhone 11","gama":"media","orden":29},"apple-iphone-xs-max":{"marca":"Apple","modelo":"iPhone XS Max","gama":"entrada","orden":30},"apple-iphone-xs":{"marca":"Apple","modelo":"iPhone XS","gama":"entrada","orden":31},"apple-iphone-xr":{"marca":"Apple","modelo":"iPhone XR","gama":"entrada","orden":32},"apple-iphone-x":{"marca":"Apple","modelo":"iPhone X","gama":"entrada","orden":33},"apple-iphone-8-plus":{"marca":"Apple","modelo":"iPhone 8 Plus","gama":"entrada","orden":34},"apple-iphone-8":{"marca":"Apple","modelo":"iPhone 8","gama":"entrada","orden":35},"samsung-galaxy-s25-ultra":{"marca":"Samsung","modelo":"Galaxy S25 Ultra","gama":"alta","orden":36},"samsung-galaxy-s25-edge":{"marca":"Samsung","modelo":"Galaxy S25 Edge","gama":"alta","orden":37},"samsung-galaxy-s25":{"marca":"Samsung","modelo":"Galaxy S25","gama":"alta","orden":39},"samsung-galaxy-z-fold7":{"marca":"Samsung","modelo":"Galaxy Z Fold7","gama":"alta","orden":40},"samsung-galaxy-z-flip7":{"marca":"Samsung","modelo":"Galaxy Z Flip7","gama":"alta","orden":41},"samsung-galaxy-z-fold6":{"marca":"Samsung","modelo":"Galaxy Z Fold6","gama":"alta","orden":42},"samsung-galaxy-z-flip6":{"marca":"Samsung","modelo":"Galaxy Z Flip6","gama":"alta","orden":43},"samsung-galaxy-z-fold5":{"marca":"Samsung","modelo":"Galaxy Z Fold5","gama":"alta","orden":44},"samsung-galaxy-z-flip5":{"marca":"Samsung","modelo":"Galaxy Z Flip5","gama":"alta","orden":45},"samsung-galaxy-s24-ultra":{"marca":"Samsung","modelo":"Galaxy S24 Ultra","gama":"alta","orden":46},"samsung-galaxy-s24":{"marca":"Samsung","modelo":"Galaxy S24","gama":"alta","orden":48},"samsung-galaxy-s24-fe":{"marca":"Samsung","modelo":"Galaxy S24 FE","gama":"media","orden":49},"samsung-galaxy-s23-ultra":{"marca":"Samsung","modelo":"Galaxy S23 Ultra","gama":"alta","orden":50},"samsung-galaxy-s23":{"marca":"Samsung","modelo":"Galaxy S23","gama":"alta","orden":52},"samsung-galaxy-s23-fe":{"marca":"Samsung","modelo":"Galaxy S23 FE","gama":"media","orden":53},"samsung-galaxy-s22-ultra":{"marca":"Samsung","modelo":"Galaxy S22 Ultra","gama":"alta","orden":54},"samsung-galaxy-s22":{"marca":"Samsung","modelo":"Galaxy S22","gama":"media","orden":56},"samsung-galaxy-s21-ultra":{"marca":"Samsung","modelo":"Galaxy S21 Ultra","gama":"media","orden":57},"samsung-galaxy-s21":{"marca":"Samsung","modelo":"Galaxy S21","gama":"media","orden":59},"samsung-galaxy-s21-fe":{"marca":"Samsung","modelo":"Galaxy S21 FE","gama":"media","orden":60},"samsung-galaxy-a56":{"marca":"Samsung","modelo":"Galaxy A56","gama":"media","orden":61},"samsung-galaxy-a36":{"marca":"Samsung","modelo":"Galaxy A36","gama":"media","orden":62},"samsung-galaxy-a26":{"marca":"Samsung","modelo":"Galaxy A26","gama":"media","orden":63},"samsung-galaxy-a55":{"marca":"Samsung","modelo":"Galaxy A55","gama":"media","orden":64},"samsung-galaxy-a35":{"marca":"Samsung","modelo":"Galaxy A35","gama":"media","orden":65},"samsung-galaxy-a25":{"marca":"Samsung","modelo":"Galaxy A25","gama":"entrada","orden":66},"samsung-galaxy-a54":{"marca":"Samsung","modelo":"Galaxy A54","gama":"media","orden":67},"samsung-galaxy-a34":{"marca":"Samsung","modelo":"Galaxy A34","gama":"media","orden":68},"samsung-galaxy-a24":{"marca":"Samsung","modelo":"Galaxy A24","gama":"entrada","orden":69},"samsung-galaxy-a16":{"marca":"Samsung","modelo":"Galaxy A16","gama":"entrada","orden":70},"samsung-galaxy-a15":{"marca":"Samsung","modelo":"Galaxy A15","gama":"entrada","orden":71},"samsung-galaxy-a14":{"marca":"Samsung","modelo":"Galaxy A14","gama":"entrada","orden":72},"samsung-galaxy-a06":{"marca":"Samsung","modelo":"Galaxy A06","gama":"entrada","orden":73},"samsung-galaxy-a05s":{"marca":"Samsung","modelo":"Galaxy A05s","gama":"entrada","orden":74},"samsung-galaxy-a05":{"marca":"Samsung","modelo":"Galaxy A05","gama":"entrada","orden":75},"motorola-razr-50-ultra":{"marca":"Motorola","modelo":"Razr 50 Ultra","gama":"alta","orden":76},"motorola-razr-50":{"marca":"Motorola","modelo":"Razr 50","gama":"media","orden":77},"motorola-razr-40-ultra":{"marca":"Motorola","modelo":"Razr 40 Ultra","gama":"alta","orden":78},"motorola-razr-40":{"marca":"Motorola","modelo":"Razr 40","gama":"media","orden":79},"motorola-edge-50-pro":{"marca":"Motorola","modelo":"Edge 50 Pro","gama":"media","orden":80},"motorola-edge-50-fusion":{"marca":"Motorola","modelo":"Edge 50 Fusion","gama":"media","orden":81},"motorola-edge-40-neo":{"marca":"Motorola","modelo":"Edge 40 Neo","gama":"media","orden":82},"motorola-edge-40":{"marca":"Motorola","modelo":"Edge 40","gama":"media","orden":83},"motorola-moto-g85":{"marca":"Motorola","modelo":"Moto G85","gama":"media","orden":84},"motorola-moto-g84":{"marca":"Motorola","modelo":"Moto G84","gama":"media","orden":85},"motorola-moto-g54":{"marca":"Motorola","modelo":"Moto G54","gama":"entrada","orden":86},"motorola-moto-g34":{"marca":"Motorola","modelo":"Moto G34","gama":"entrada","orden":87},"motorola-moto-g24":{"marca":"Motorola","modelo":"Moto G24","gama":"entrada","orden":88},"motorola-moto-g04":{"marca":"Motorola","modelo":"Moto G04","gama":"entrada","orden":89},"motorola-moto-e13":{"marca":"Motorola","modelo":"Moto E13","gama":"entrada","orden":90},"xiaomi-xiaomi-14t":{"marca":"Xiaomi","modelo":"Xiaomi 14T","gama":"alta","orden":91},"xiaomi-xiaomi-13t":{"marca":"Xiaomi","modelo":"Xiaomi 13T","gama":"media","orden":92},"xiaomi-poco-x6-pro":{"marca":"Xiaomi","modelo":"POCO X6 Pro","gama":"media","orden":93},"xiaomi-redmi-note-14-pro":{"marca":"Xiaomi","modelo":"Redmi Note 14 Pro","gama":"media","orden":94},"xiaomi-redmi-note-14":{"marca":"Xiaomi","modelo":"Redmi Note 14","gama":"entrada","orden":95},"xiaomi-redmi-note-13-pro":{"marca":"Xiaomi","modelo":"Redmi Note 13 Pro","gama":"media","orden":96},"xiaomi-redmi-note-13":{"marca":"Xiaomi","modelo":"Redmi Note 13","gama":"entrada","orden":97},"xiaomi-redmi-note-12":{"marca":"Xiaomi","modelo":"Redmi Note 12","gama":"entrada","orden":98},"xiaomi-redmi-14c":{"marca":"Xiaomi","modelo":"Redmi 14C","gama":"entrada","orden":99},"xiaomi-redmi-13c":{"marca":"Xiaomi","modelo":"Redmi 13C","gama":"entrada","orden":100},"huawei-nova-9":{"marca":"Huawei","modelo":"nova 9","gama":"media","orden":101},"huawei-p40-lite":{"marca":"Huawei","modelo":"P40 Lite","gama":"entrada","orden":102},"huawei-p30-lite":{"marca":"Huawei","modelo":"P30 Lite","gama":"entrada","orden":103},"huawei-y9-2019":{"marca":"Huawei","modelo":"Y9 2019","gama":"entrada","orden":104},"honor-magic5-lite":{"marca":"Honor","modelo":"Magic5 Lite","gama":"media","orden":105},"honor-x8a":{"marca":"Honor","modelo":"X8a","gama":"entrada","orden":106},"honor-x7b":{"marca":"Honor","modelo":"X7b","gama":"entrada","orden":107},"oppo-reno10-5g":{"marca":"OPPO","modelo":"Reno10 5G","gama":"media","orden":108},"oppo-a78":{"marca":"OPPO","modelo":"A78","gama":"entrada","orden":109},"oppo-a58":{"marca":"OPPO","modelo":"A58","gama":"entrada","orden":110},"oppo-a38":{"marca":"OPPO","modelo":"A38","gama":"entrada","orden":111},"oppo-a18":{"marca":"OPPO","modelo":"A18","gama":"entrada","orden":112},"realme-11-pro":{"marca":"Realme","modelo":"11 Pro","gama":"media","orden":113},"realme-c67":{"marca":"Realme","modelo":"C67","gama":"entrada","orden":114},"realme-c55":{"marca":"Realme","modelo":"C55","gama":"entrada","orden":115},"realme-c53":{"marca":"Realme","modelo":"C53","gama":"entrada","orden":116},"zte-blade-v40":{"marca":"ZTE","modelo":"Blade V40","gama":"entrada","orden":117},"zte-blade-a54":{"marca":"ZTE","modelo":"Blade A54","gama":"entrada","orden":118}},"tarifas":{"apple-iphone-13|pantalla|original":{"modeloId":"apple-iphone-13","problema":"pantalla","calidad":"Original","precio":3200,"tiempo":"2 horas","refaccionId":"pr-pant-13-o","demo":true},"apple-iphone-13|pantalla|generica":{"modeloId":"apple-iphone-13","problema":"pantalla","calidad":"Genérica","precio":1850,"tiempo":"2 horas","refaccionId":"pr-pant-13-g","demo":true},"apple-iphone-13|bateria|unica":{"modeloId":"apple-iphone-13","problema":"bateria","calidad":"","precio":950,"tiempo":"1 hora","refaccionId":"pr-bat-13","demo":true},"apple-iphone-11|pantalla|unica":{"modeloId":"apple-iphone-11","problema":"pantalla","calidad":"","precio":1450,"tiempo":"2 horas","refaccionId":"pr-pant-11","demo":true},"apple-iphone-11|bateria|unica":{"modeloId":"apple-iphone-11","problema":"bateria","calidad":"","precio":850,"tiempo":"1 hora","refaccionId":"pr-bat-11","demo":true},"samsung-galaxy-a54|pantalla|unica":{"modeloId":"samsung-galaxy-a54","problema":"pantalla","calidad":"","precio":2300,"tiempo":"1 día","refaccionId":"pr-pant-a54","demo":true},"samsung-galaxy-a54|carga|unica":{"modeloId":"samsung-galaxy-a54","problema":"carga","calidad":"","precio":650,"tiempo":"3 horas","refaccionId":"pr-carga-a54","demo":true},"motorola-moto-g84|pantalla|unica":{"modeloId":"motorola-moto-g84","problema":"pantalla","calidad":"","precio":1600,"tiempo":"1 día","refaccionId":"pr-pant-g84","demo":true},"xiaomi-redmi-note-13|carga|unica":{"modeloId":"xiaomi-redmi-note-13","problema":"carga","calidad":"","precio":550,"tiempo":"3 horas","refaccionId":"pr-carga-n13","demo":true}},"productos":{"pr-pant-13-o":{"nombre":"Pantalla iPhone 13 · original","tipo":"refaccion","categoria":"refacciones","precio":null,"compat":"iPhone 13","marca":"","demo":true},"pr-pant-13-g":{"nombre":"Pantalla iPhone 13 · genérica","tipo":"refaccion","categoria":"refacciones","precio":null,"compat":"iPhone 13","marca":"","demo":true},"pr-bat-13":{"nombre":"Batería iPhone 13","tipo":"refaccion","categoria":"refacciones","precio":null,"compat":"iPhone 13","marca":"","demo":true},"pr-pant-11":{"nombre":"Pantalla iPhone 11","tipo":"refaccion","categoria":"refacciones","precio":null,"compat":"iPhone 11","marca":"","demo":true},"pr-bat-11":{"nombre":"Batería iPhone 11","tipo":"refaccion","categoria":"refacciones","precio":null,"compat":"iPhone 11","marca":"","demo":true},"pr-pant-a54":{"nombre":"Pantalla Galaxy A54","tipo":"refaccion","categoria":"refacciones","precio":null,"compat":"Galaxy A54","marca":"","demo":true},"pr-carga-a54":{"nombre":"Centro de carga Galaxy A54","tipo":"refaccion","categoria":"refacciones","precio":null,"compat":"Galaxy A54","marca":"","demo":true},"pr-pant-g84":{"nombre":"Pantalla Moto G84","tipo":"refaccion","categoria":"refacciones","precio":null,"compat":"Moto G84","marca":"","demo":true},"pr-carga-n13":{"nombre":"Centro de carga Redmi Note 13","tipo":"refaccion","categoria":"refacciones","precio":null,"compat":"Redmi Note 13","marca":"","demo":true},"pr-mica-13":{"nombre":"Mica de vidrio templado","tipo":"accesorio","categoria":"micas","precio":150,"compat":"iPhone 13 / 13 Pro / 14","marca":"","demo":true},"pr-mica-a54":{"nombre":"Mica de vidrio templado","tipo":"accesorio","categoria":"micas","precio":150,"compat":"Galaxy A54","marca":"","demo":true},"pr-priv-15":{"nombre":"Mica de privacidad","tipo":"accesorio","categoria":"privacidad","precio":250,"compat":"iPhone 15 / 16","marca":"","demo":true},"pr-hidro":{"nombre":"Mica de hidrogel (corte a la medida)","tipo":"accesorio","categoria":"hidrogel","precio":200,"compat":"Cualquier modelo","marca":"","demo":true},"pr-funda-13":{"nombre":"Funda transparente antigolpes","tipo":"accesorio","categoria":"fundas","precio":180,"compat":"iPhone 13","marca":"","demo":true},"pr-funda-a54":{"nombre":"Funda uso rudo","tipo":"accesorio","categoria":"fundas","precio":220,"compat":"Galaxy A54","marca":"","demo":true},"pr-carg-20":{"nombre":"Cargador USB-C 20 W","tipo":"accesorio","categoria":"cargadores","precio":290,"compat":"","marca":"","demo":true},"pr-cable-l":{"nombre":"Cable USB-C a Lightning 1 m","tipo":"accesorio","categoria":"cargadores","precio":190,"compat":"","marca":"","demo":true},"pr-power-10":{"nombre":"Batería portátil 10,000 mAh","tipo":"accesorio","categoria":"baterias","precio":450,"compat":"","marca":"","demo":true},"pr-airpods":{"nombre":"AirPods Pro (2.ª generación)","tipo":"accesorio","categoria":"audio","precio":4600,"compat":"","marca":"Apple","demo":true},"pr-watch":{"nombre":"Apple Watch SE (2.ª generación) 40 mm","tipo":"accesorio","categoria":"relojes","precio":5200,"compat":"","marca":"Apple","demo":true}},"existencias":{"pr-pant-13-o":{"disp":1,"apart":0,"min":1},"pr-pant-13-g":{"disp":2,"apart":0,"min":2},"pr-bat-13":{"disp":3,"apart":0,"min":2},"pr-pant-11":{"disp":1,"apart":0,"min":1},"pr-bat-11":{"disp":2,"apart":0,"min":2},"pr-pant-a54":{"disp":0,"apart":0,"min":1},"pr-carga-a54":{"disp":2,"apart":0,"min":1},"pr-pant-g84":{"disp":0,"apart":1,"min":1},"pr-carga-n13":{"disp":0,"apart":0,"min":1},"pr-mica-13":{"disp":14,"apart":0,"min":5},"pr-mica-a54":{"disp":6,"apart":0,"min":5},"pr-priv-15":{"disp":4,"apart":0,"min":3},"pr-hidro":{"disp":30,"apart":0,"min":10},"pr-funda-13":{"disp":5,"apart":0,"min":3},"pr-funda-a54":{"disp":2,"apart":0,"min":3},"pr-carg-20":{"disp":7,"apart":0,"min":3},"pr-cable-l":{"disp":9,"apart":0,"min":4},"pr-power-10":{"disp":3,"apart":0,"min":2},"pr-airpods":{"disp":1,"apart":0,"min":1},"pr-watch":{"disp":0,"apart":0,"min":1}},"_ancla":"2026-10-22","costos":{"pr-pant-13-o":{"costo":2300},"pr-pant-13-g":{"costo":900},"pr-bat-13":{"costo":420},"pr-pant-11":{"costo":700},"pr-bat-11":{"costo":380},"pr-pant-a54":{"costo":1500},"pr-carga-a54":{"costo":180},"pr-pant-g84":{"costo":1250},"pr-carga-n13":{"costo":150},"pr-mica-13":{"costo":35},"pr-mica-a54":{"costo":35},"pr-priv-15":{"costo":80},"pr-hidro":{"costo":45},"pr-funda-13":{"costo":60},"pr-funda-a54":{"costo":85},"pr-carg-20":{"costo":140},"pr-cable-l":{"costo":70},"pr-power-10":{"costo":230},"pr-airpods":{"costo":3900},"pr-watch":{"costo":4400},"eq-12":{"costo":4800},"eq-a15":{"costo":2900},"eq-g24":{"costo":1900},"eq-13":{"costo":5200},"eq-a14":{"costo":900}},"equipos":{"eq-12":{"marca":"Apple","modelo":"iPhone 12","modeloId":"apple-iphone-12","capacidad":"128 GB","color":"Azul","condicion":"seminuevo","bateria":86,"imei":"350000000000121","precio":6900,"estado":"disponible","origen":"Compra a cliente","alta":"2026-10-07","demo":true},"eq-a15":{"marca":"Samsung","modelo":"Galaxy A15","modeloId":"samsung-galaxy-a15","capacidad":"128 GB","color":"Negro","condicion":"nuevo","bateria":null,"imei":"350000000000152","precio":3999,"estado":"disponible","origen":"Proveedor","alta":"2026-09-22","demo":true},"eq-g24":{"marca":"Motorola","modelo":"Moto G24","modeloId":"motorola-moto-g24","capacidad":"128 GB","color":"Gris","condicion":"nuevo","bateria":null,"imei":"350000000000243","precio":2799,"estado":"disponible","origen":"Proveedor","alta":"2026-09-22","demo":true},"eq-13":{"marca":"Apple","modelo":"iPhone 13","modeloId":"apple-iphone-13","capacidad":"128 GB","color":"Blanco","condicion":"seminuevo","bateria":81,"imei":"350000000000134","precio":null,"estado":"reacondicionar","origen":"Compra a cliente","compraId":"ce-1","alta":"2026-10-21","demo":true},"eq-a14":{"marca":"Samsung","modelo":"Galaxy A14","modeloId":"samsung-galaxy-a14","capacidad":"64 GB","color":"Negro","condicion":"seminuevo","bateria":88,"imei":"350000000000909","precio":null,"estado":"reacondicionar","origen":"Toma a cuenta","compraId":"ce-2","alta":"2026-10-20","demo":true}},"clientes":{"cl-ana":{"nombre":"Ana Martínez","tel":"8100000001","correo":"","tecmi":true,"alta":"2026-06-24","dispositivos":[{"id":"eq-ana-1","marca":"Apple","modelo":"iPhone 13","modeloId":"apple-iphone-13","imei":"350000000000301","color":"Rosa","origen":"Reparación","ref":"OS-260624-K7PQ","alta":"2026-06-24","garantiaHasta":"2026-09-22"}],"bitacora":[{"fecha":"2026-06-24","autor":"Mostrador 1","tipo":"Entrega","nota":"Entregado reparado · OS-260624-K7PQ"}]},"cl-luis":{"nombre":"Luis Hernández","tel":"8100000002","correo":"","tecmi":true,"alta":"2026-10-19","dispositivos":[],"bitacora":[]},"cl-sofia":{"nombre":"Sofía Garza","tel":"8100000003","correo":"","tecmi":false,"alta":"2026-09-27","dispositivos":[{"id":"eq-sof-1","marca":"Apple","modelo":"iPhone 13","modeloId":"apple-iphone-13","imei":"350000000000302","color":"Azul","origen":"Reparación","ref":"OS-261002-M3RT","alta":"2026-10-02","garantiaHasta":"2026-12-31"}],"bitacora":[]},"cl-diego":{"nombre":"Diego Treviño","tel":"8100000004","correo":"","tecmi":true,"alta":"2026-10-16","dispositivos":[],"bitacora":[]},"cl-mariana":{"nombre":"Mariana López","tel":"8100000005","correo":"","tecmi":false,"alta":"2026-10-20","dispositivos":[],"bitacora":[]},"cl-jorge":{"nombre":"Jorge Ramírez","tel":"8100000006","correo":"","tecmi":false,"alta":"2026-10-18","dispositivos":[],"bitacora":[]}},"citas":{"ct-1":{"folio":"CT-261022-A1B2","fecha":"2026-10-22","hora":"09:30","turno":1,"motivo":"reparacion","modalidad":"cafeteria","lugar":"Cafetería de Tecmilenio","clienteId":"cl-ana","contacto":{"nombre":"Ana Martínez","tel":"8100000001","correo":"","tecmi":true},"cotizacion":{"tipo":"reparacion","problema":"pantalla","modeloId":"apple-iphone-13","equipo":"Apple iPhone 13","tarifaId":"apple-iphone-13|pantalla|generica","precio":1850},"nota":"","estado":"atendida","origen":"sitio","creada":"2026-10-20","ordenId":"os-1","historial":[{"fecha":"2026-10-20","hora":"18:40","autor":"Equipo","nota":"Cita agendada · desde el sitio"}]},"ct-2":{"folio":"CT-261022-C3D4","fecha":"2026-10-22","hora":"10:00","turno":2,"motivo":"entrega","modalidad":"cafeteria","lugar":"Cafetería de Tecmilenio","clienteId":"cl-luis","contacto":{"nombre":"Luis Hernández","tel":"8100000002","correo":"","tecmi":true},"cotizacion":{"tipo":"entrega","ordenFolio":"OS-261020-L2WX"},"nota":"","estado":"llego","origen":"sitio","creada":"2026-10-20","ordenId":null,"historial":[{"fecha":"2026-10-20","hora":"18:40","autor":"Equipo","nota":"Cita agendada · desde el sitio"}]},"ct-3":{"folio":"CT-261022-E5F6","fecha":"2026-10-22","hora":"10:30","turno":3,"motivo":"reparacion","modalidad":"cafeteria","lugar":"Cafetería de Tecmilenio","clienteId":null,"contacto":{"nombre":"Valeria Cantú","tel":"8100000007","correo":"","tecmi":true},"cotizacion":{"tipo":"reparacion","problema":"bateria","modeloId":"apple-iphone-11","equipo":"Apple iPhone 11","tarifaId":"apple-iphone-11|bateria|unica","precio":850},"nota":"Se apaga solo al 30%","estado":"agendada","origen":"sitio","creada":"2026-10-20","ordenId":null,"historial":[{"fecha":"2026-10-20","hora":"18:40","autor":"Equipo","nota":"Cita agendada · desde el sitio"}]},"ct-4":{"folio":"CT-261022-G7H8","fecha":"2026-10-22","hora":"11:00","turno":4,"motivo":"duda","modalidad":"cafeteria","lugar":"Cafetería de Tecmilenio","clienteId":"cl-sofia","contacto":{"nombre":"Sofía Garza","tel":"8100000003","correo":"","tecmi":false},"cotizacion":null,"nota":"","estado":"agendada","origen":"sitio","creada":"2026-10-20","ordenId":null,"historial":[{"fecha":"2026-10-20","hora":"18:40","autor":"Equipo","nota":"Cita agendada · desde el sitio"}]},"ct-5":{"folio":"CT-261022-J9K2","fecha":"2026-10-22","hora":"12:00","turno":5,"motivo":"venta","modalidad":"cafeteria","lugar":"Cafetería de Tecmilenio","clienteId":null,"contacto":{"nombre":"Ricardo Elizondo","tel":"8100000008","correo":"","tecmi":false},"cotizacion":{"tipo":"venta","modeloId":"apple-iphone-xr","equipo":"Apple iPhone XR","condicion":"bueno","capacidad":"64 GB","preferencia":"toma"},"nota":"","estado":"agendada","origen":"sitio","creada":"2026-10-20","ordenId":null,"historial":[{"fecha":"2026-10-20","hora":"18:40","autor":"Equipo","nota":"Cita agendada · desde el sitio"}]},"ct-6":{"folio":"CT-261022-M3N4","fecha":"2026-10-22","hora":"13:30","turno":6,"motivo":"compra","modalidad":"cafeteria","lugar":"Cafetería de Tecmilenio","clienteId":"cl-diego","contacto":{"nombre":"Diego Treviño","tel":"8100000004","correo":"","tecmi":true},"cotizacion":{"tipo":"compra","productoId":"pr-priv-15","equipo":"Mica de privacidad"},"nota":"","estado":"agendada","origen":"sitio","creada":"2026-10-20","ordenId":null,"historial":[{"fecha":"2026-10-20","hora":"18:40","autor":"Equipo","nota":"Cita agendada · desde el sitio"}]},"ct-7":{"folio":"CT-261023-P5Q6","fecha":"2026-10-23","hora":"10:00","turno":1,"motivo":"reparacion","modalidad":"cafeteria","lugar":"Cafetería de Tecmilenio","clienteId":null,"contacto":{"nombre":"Fernanda Ríos","tel":"8100000009","correo":"","tecmi":true},"cotizacion":{"tipo":"reparacion","problema":"carga","modeloId":"samsung-galaxy-a54","equipo":"Samsung Galaxy A54","tarifaId":"samsung-galaxy-a54|carga|unica","precio":650},"nota":"","estado":"agendada","origen":"sitio","creada":"2026-10-20","ordenId":null,"historial":[{"fecha":"2026-10-20","hora":"18:40","autor":"Equipo","nota":"Cita agendada · desde el sitio"}]},"ct-8":{"folio":"CT-261023-R7S8","fecha":"2026-10-23","hora":"12:30","turno":2,"motivo":"reparacion","modalidad":"cafeteria","lugar":"Cafetería de Tecmilenio","clienteId":null,"contacto":{"nombre":"Héctor Villarreal","tel":"8100000010","correo":"","tecmi":false},"cotizacion":{"tipo":"reparacion","problema":"diagnostico","modeloId":null,"equipo":"Huawei P30 Lite","tarifaId":null,"precio":null},"nota":"","estado":"agendada","origen":"sitio","creada":"2026-10-20","ordenId":null,"historial":[{"fecha":"2026-10-20","hora":"18:40","autor":"Equipo","nota":"Cita agendada · desde el sitio"}]},"ct-9":{"folio":"CT-261021-T9U2","fecha":"2026-10-21","hora":"11:30","turno":3,"motivo":"reparacion","modalidad":"cafeteria","lugar":"Cafetería de Tecmilenio","clienteId":null,"contacto":{"nombre":"Paola Saldaña","tel":"8100000011","correo":"","tecmi":true},"cotizacion":{"tipo":"reparacion","problema":"pantalla","modeloId":"motorola-moto-g84","equipo":"Motorola Moto G84","tarifaId":"motorola-moto-g84|pantalla|unica","precio":1600},"nota":"","estado":"noasistio","origen":"sitio","creada":"2026-10-20","ordenId":null,"historial":[{"fecha":"2026-10-20","hora":"18:40","autor":"Equipo","nota":"Cita agendada · desde el sitio"}]},"ct-10":{"folio":"CT-261021-V3W4","fecha":"2026-10-21","hora":"13:00","turno":4,"motivo":"duda","modalidad":"cafeteria","lugar":"Cafetería de Tecmilenio","clienteId":"cl-mariana","contacto":{"nombre":"Mariana López","tel":"8100000005","correo":"","tecmi":false},"cotizacion":null,"nota":"","estado":"cancelada","origen":"sitio","creada":"2026-10-20","ordenId":null,"historial":[{"fecha":"2026-10-20","hora":"18:40","autor":"Equipo","nota":"Cita agendada · desde el sitio"}],"cierre":{"motivo":"reprogramo","fecha":"2026-10-21"}}},"ordenes":{"os-1":{"folio":"OS-261022-B8C9","clienteId":"cl-ana","citaId":"ct-1","origen":"mostrador","modalidad":"cafeteria","equipo":{"modeloId":"apple-iphone-13","marca":"Apple","modelo":"iPhone 13","imei":"350000000000301","color":"Rosa","accesoTipo":"pin","acceso":"1234"},"problema":"pantalla","falla":"Se cayó; cristal estrellado y manchas negras arriba.","recepcion":{"checklist":{"enciende":"si","pantalla":"no","carga":"si","bocina":"si","microfono":"si","camaras":"si","botones":"si","biometria":"np","senal":"si","tapa":"si"},"accesorios":["Funda"],"notas":"","aceptaTerminos":true,"por":"Mostrador 1"},"diagnostico":"","lineas":[{"tipo":"servicio","tarifaId":"apple-iphone-13|pantalla|generica","productoId":"pr-pant-13-g","desc":"Cambio de pantalla · genérica · iPhone 13","cant":1,"precio":1850,"apartado":0}],"autorizacion":{"estado":"pendiente"},"estado":"recibido","tecnico":"Técnico 1","promesa":"2026-10-22","pagos":[],"historial":[{"fecha":"2026-10-22","hora":"09:42","autor":"Mostrador 1","nota":"Equipo recibido en Cafetería de Tecmilenio","publico":true}],"creada":"2026-10-22","actualizada":"2026-10-22"},"os-2":{"folio":"OS-261020-L2WX","clienteId":"cl-luis","citaId":null,"origen":"mostrador","modalidad":"cafeteria","equipo":{"modeloId":"samsung-galaxy-a54","marca":"Samsung","modelo":"Galaxy A54","imei":"350000000000402","color":"Negro","accesoTipo":"ninguno","acceso":""},"problema":"carga","falla":"Solo carga si se mueve el cable.","recepcion":{"checklist":{"enciende":"si","pantalla":"si","carga":"si","bocina":"si","microfono":"si","camaras":"si","botones":"si","biometria":"si","senal":"si","tapa":"si"},"accesorios":[],"notas":"","aceptaTerminos":true,"por":"Mostrador 1"},"diagnostico":"Pines del centro de carga dañados. Se reemplaza el puerto.","lineas":[{"tipo":"servicio","tarifaId":"samsung-galaxy-a54|carga|unica","productoId":"pr-carga-a54","desc":"Cambio de centro de carga · Galaxy A54","cant":1,"precio":650,"apartado":0}],"autorizacion":{"estado":"autorizado","medio":"mostrador","fecha":"2026-10-20","hora":"12:10","por":"Mostrador 1","monto":650},"estado":"listo","tecnico":"Técnico 2","promesa":"2026-10-21","pagos":[{"fecha":"2026-10-20","hora":"12:12","monto":200,"forma":"efectivo","concepto":"Anticipo","por":"Mostrador 1"}],"historial":[{"fecha":"2026-10-20","hora":"12:00","autor":"Mostrador 1","nota":"Equipo recibido en Cafetería de Tecmilenio","publico":true},{"fecha":"2026-10-20","hora":"12:10","autor":"Mostrador 1","nota":"Presupuesto autorizado (En mostrador) por $650","publico":true},{"fecha":"2026-10-21","hora":"16:20","autor":"Técnico 2","nota":"Reparación terminada · equipo probado","publico":true}],"creada":"2026-10-20","actualizada":"2026-10-20"},"os-3":{"folio":"OS-261021-N4YZ","clienteId":"cl-mariana","citaId":null,"origen":"mostrador","modalidad":"cafeteria","equipo":{"modeloId":"apple-iphone-11","marca":"Apple","modelo":"iPhone 11","imei":"350000000000503","color":"Blanco","accesoTipo":"pin","acceso":"0000"},"problema":"bateria","falla":"Se descarga en 3 horas.","recepcion":{"checklist":{"enciende":"si","pantalla":"si","carga":"si","bocina":"si","microfono":"si","camaras":"si","botones":"si","biometria":"si","senal":"si","tapa":"si"},"accesorios":[],"notas":"","aceptaTerminos":true,"por":"Mostrador 1"},"diagnostico":"Estado de la batería al 71%. Se recomienda cambio.","lineas":[{"tipo":"servicio","tarifaId":"apple-iphone-11|bateria|unica","productoId":"pr-bat-11","desc":"Cambio de batería · iPhone 11","cant":1,"precio":850,"apartado":0}],"autorizacion":{"estado":"pendiente"},"estado":"presupuesto","tecnico":"Técnico 1","promesa":"2026-10-23","pagos":[],"historial":[{"fecha":"2026-10-21","hora":"13:05","autor":"Mostrador 1","nota":"Equipo recibido en Cafetería de Tecmilenio","publico":true},{"fecha":"2026-10-21","hora":"17:30","autor":"Técnico 1","nota":"Presupuesto enviado al cliente","publico":true}],"creada":"2026-10-21","actualizada":"2026-10-21"},"os-4":{"folio":"OS-261018-Q6AB","clienteId":"cl-jorge","citaId":null,"origen":"mostrador","modalidad":"cafeteria","equipo":{"modeloId":"motorola-moto-g84","marca":"Motorola","modelo":"Moto G84","imei":"350000000000604","color":"Azul","accesoTipo":"ninguno","acceso":""},"problema":"pantalla","falla":"Líneas verdes en la pantalla.","recepcion":{"checklist":{"enciende":"si","pantalla":"si","carga":"si","bocina":"si","microfono":"si","camaras":"si","botones":"si","biometria":"si","senal":"si","tapa":"si"},"accesorios":[],"notas":"","aceptaTerminos":true,"por":"Mostrador 1"},"diagnostico":"Display dañado por golpe.","lineas":[{"tipo":"servicio","tarifaId":"motorola-moto-g84|pantalla|unica","productoId":"pr-pant-g84","desc":"Cambio de pantalla · Moto G84","cant":1,"precio":1600,"apartado":1}],"autorizacion":{"estado":"autorizado","medio":"whatsapp","fecha":"2026-10-19","hora":"10:15","por":"Mostrador 1","monto":1600},"estado":"reparacion","tecnico":"Técnico 2","promesa":"2026-10-22","pagos":[{"fecha":"2026-10-19","hora":"10:20","monto":800,"forma":"transferencia","concepto":"Anticipo","por":"Mostrador 1"}],"historial":[{"fecha":"2026-10-18","hora":"16:00","autor":"Mostrador 1","nota":"Equipo recibido en Cafetería de Tecmilenio","publico":true},{"fecha":"2026-10-19","hora":"10:15","autor":"Mostrador 1","nota":"Presupuesto autorizado (Por WhatsApp) por $1,600","publico":true}],"creada":"2026-10-18","actualizada":"2026-10-18"},"os-5":{"folio":"OS-261019-S8CD","clienteId":"cl-diego","citaId":null,"origen":"mostrador","modalidad":"cafeteria","equipo":{"modeloId":"xiaomi-redmi-note-13","marca":"Xiaomi","modelo":"Redmi Note 13","imei":"350000000000705","color":"Verde","accesoTipo":"ninguno","acceso":""},"problema":"carga","falla":"No reconoce el cargador.","recepcion":{"checklist":{"enciende":"si","pantalla":"si","carga":"si","bocina":"si","microfono":"si","camaras":"si","botones":"si","biometria":"si","senal":"si","tapa":"si"},"accesorios":[],"notas":"","aceptaTerminos":true,"por":"Mostrador 1"},"diagnostico":"","lineas":[{"tipo":"servicio","tarifaId":"xiaomi-redmi-note-13|carga|unica","productoId":"pr-carga-n13","desc":"Cambio de centro de carga · Redmi Note 13","cant":1,"precio":550,"apartado":0}],"autorizacion":{"estado":"autorizado","medio":"mostrador","fecha":"2026-10-19","hora":"11:00","por":"Mostrador 1","monto":550},"estado":"espera","tecnico":"Técnico 1","promesa":"2026-10-24","pagos":[],"historial":[{"fecha":"2026-10-19","hora":"10:40","autor":"Mostrador 1","nota":"Equipo recibido en Cafetería de Tecmilenio","publico":true},{"fecha":"2026-10-19","hora":"11:00","autor":"Mostrador 1","nota":"Presupuesto autorizado (En mostrador) por $550 · esperando 1 refacción(es)","publico":true}],"creada":"2026-10-19","actualizada":"2026-10-19"},"os-6":{"folio":"OS-261002-M3RT","clienteId":"cl-sofia","citaId":null,"origen":"mostrador","modalidad":"cafeteria","equipo":{"modeloId":"apple-iphone-13","marca":"Apple","modelo":"iPhone 13","imei":"350000000000302","color":"Azul","accesoTipo":"ninguno","acceso":""},"problema":"bateria","falla":"Batería inflada.","recepcion":{"checklist":{"enciende":"si","pantalla":"si","carga":"si","bocina":"si","microfono":"si","camaras":"si","botones":"si","biometria":"si","senal":"si","tapa":"si"},"accesorios":[],"notas":"","aceptaTerminos":true,"por":"Mostrador 1"},"diagnostico":"","lineas":[{"tipo":"servicio","tarifaId":"apple-iphone-13|bateria|unica","productoId":"pr-bat-13","desc":"Cambio de batería · iPhone 13","cant":1,"precio":950,"apartado":0}],"autorizacion":{"estado":"autorizado","medio":"mostrador","fecha":"2026-10-01","hora":"10:00","por":"Mostrador 1","monto":950},"estado":"entregado","tecnico":"Técnico 1","promesa":"2026-10-02","pagos":[{"fecha":"2026-10-02","hora":"13:00","monto":950,"forma":"tarjeta","concepto":"Liquidación","por":"Mostrador 1"}],"historial":[{"fecha":"2026-10-01","hora":"09:50","autor":"Mostrador 1","nota":"Equipo recibido en Cafetería de Tecmilenio","publico":true},{"fecha":"2026-10-02","hora":"13:00","autor":"Mostrador 1","nota":"Equipo entregado a Sofía Garza · garantía hasta 2026-12-31","publico":true}],"creada":"2026-10-01","actualizada":"2026-10-01","entrega":{"fecha":"2026-10-02","hora":"13:00","por":"Mostrador 1","recibio":"Sofía Garza","pruebas":{},"reparado":true,"garantiaDias":90,"garantiaHasta":"2026-12-31"}},"os-7":{"folio":"OS-261020-U2EF","clienteId":"cl-jorge","citaId":null,"origen":"mostrador","modalidad":"cafeteria","equipo":{"modeloId":"apple-iphone-11","marca":"Apple","modelo":"iPhone 11","imei":"350000000000806","color":"Negro","accesoTipo":"ninguno","acceso":""},"problema":"pantalla","falla":"Pantalla estrellada; el táctil funciona.","recepcion":{"checklist":{"enciende":"si","pantalla":"si","carga":"si","bocina":"si","microfono":"si","camaras":"si","botones":"si","biometria":"si","senal":"si","tapa":"si"},"accesorios":[],"notas":"","aceptaTerminos":true,"por":"Mostrador 1"},"diagnostico":"","lineas":[{"tipo":"servicio","tarifaId":"apple-iphone-11|pantalla|unica","productoId":"pr-pant-11","desc":"Cambio de pantalla · iPhone 11","cant":1,"precio":1450,"apartado":0}],"autorizacion":{"estado":"rechazado","medio":"telefono","fecha":"2026-10-21","hora":"12:00","por":"Mostrador 1","motivo":"precio"},"estado":"rechazado","tecnico":"Técnico 2","promesa":null,"pagos":[],"historial":[{"fecha":"2026-10-20","hora":"15:00","autor":"Mostrador 1","nota":"Equipo recibido en Cafetería de Tecmilenio","publico":true},{"fecha":"2026-10-21","hora":"12:00","autor":"Mostrador 1","nota":"Presupuesto no autorizado · Precio · el equipo se devuelve","publico":true}],"creada":"2026-10-20","actualizada":"2026-10-20"},"os-8":{"folio":"OS-260624-K7PQ","clienteId":"cl-ana","citaId":null,"origen":"mostrador","modalidad":"cafeteria","equipo":{"modeloId":"apple-iphone-13","marca":"Apple","modelo":"iPhone 13","imei":"350000000000301","color":"Rosa","accesoTipo":"ninguno","acceso":""},"problema":"bateria","falla":"Se apaga solo.","recepcion":{"checklist":{"enciende":"si","pantalla":"si","carga":"si","bocina":"si","microfono":"si","camaras":"si","botones":"si","biometria":"si","senal":"si","tapa":"si"},"accesorios":[],"notas":"","aceptaTerminos":true,"por":"Mostrador 1"},"diagnostico":"","lineas":[{"tipo":"servicio","tarifaId":"apple-iphone-13|bateria|unica","productoId":"pr-bat-13","desc":"Cambio de batería · iPhone 13","cant":1,"precio":950,"apartado":0}],"autorizacion":{"estado":"autorizado","medio":"mostrador","fecha":"2026-06-23","hora":"11:00","por":"Mostrador 1","monto":950},"estado":"entregado","tecnico":"Técnico 1","promesa":"2026-06-24","pagos":[{"fecha":"2026-06-24","hora":"12:00","monto":950,"forma":"efectivo","concepto":"Liquidación","por":"Mostrador 1"}],"historial":[{"fecha":"2026-06-23","hora":"10:30","autor":"Mostrador 1","nota":"Equipo recibido en Cafetería de Tecmilenio","publico":true},{"fecha":"2026-06-24","hora":"12:00","autor":"Mostrador 1","nota":"Equipo entregado a Ana Martínez · garantía hasta 2026-09-22","publico":true}],"creada":"2026-06-23","actualizada":"2026-06-23","entrega":{"fecha":"2026-06-24","hora":"12:00","por":"Mostrador 1","recibio":"Ana Martínez","pruebas":{},"reparado":true,"garantiaDias":90,"garantiaHasta":"2026-09-22"}}},"ventas":{"vt-1":{"folio":"V-261022-X2Y3","fecha":"2026-10-22","hora":"09:15","clienteId":null,"lineas":[{"productoId":"pr-mica-13","desc":"Mica de vidrio templado · iPhone 13 / 13 Pro / 14","cant":1,"precio":150},{"productoId":"pr-funda-13","desc":"Funda transparente antigolpes · iPhone 13","cant":1,"precio":180}],"total":330,"tomaId":null,"credito":0,"pagos":[{"forma":"efectivo","monto":500,"fecha":"2026-10-22"}],"cambio":170,"vendedor":"Mostrador 1"},"vt-2":{"folio":"V-261021-Z4A5","fecha":"2026-10-21","hora":"14:30","clienteId":"cl-diego","lineas":[{"productoId":"pr-carg-20","desc":"Cargador USB-C 20 W","cant":1,"precio":290},{"productoId":"pr-cable-l","desc":"Cable USB-C a Lightning 1 m","cant":1,"precio":190}],"total":480,"tomaId":null,"credito":0,"pagos":[{"forma":"tarjeta","monto":480,"fecha":"2026-10-21"}],"cambio":0,"vendedor":"Mostrador 1"}},"compras":{"ce-1":{"folio":"CE-261021-B6C7","fecha":"2026-10-21","tipo":"compra","vendedor":{"nombre":"Alejandro Garza","tel":"8100000012","identificacion":"INE","idUltimos":"4821"},"equipo":{"modeloId":"apple-iphone-13","marca":"Apple","modelo":"iPhone 13","capacidad":"128 GB","color":"Blanco","imei":"350000000000134","bateria":81,"condicion":"bueno","notas":"Rayones leves en el marco."},"verificacion":{"identificacion":true,"imei":true,"cuentas":true,"propiedad":true},"oferta":5200,"precio":5200,"estado":"aceptada","equipoId":"eq-13","cerrada":"2026-10-21","pago":{"fecha":"2026-10-21","hora":"16:10","forma":"efectivo","monto":5200,"por":"Mostrador 1"},"por":"Mostrador 1"},"ce-2":{"folio":"CE-261020-D8E9","fecha":"2026-10-20","tipo":"toma","vendedor":{"nombre":"Mariana López","tel":"8100000005","identificacion":"INE","idUltimos":"1937","clienteId":"cl-mariana"},"equipo":{"modeloId":"samsung-galaxy-a14","marca":"Samsung","modelo":"Galaxy A14","capacidad":"64 GB","color":"Negro","imei":"350000000000909","bateria":88,"condicion":"bueno","notas":""},"verificacion":{"identificacion":true,"imei":true,"cuentas":true,"propiedad":true},"oferta":900,"precio":900,"estado":"aceptada","equipoId":"eq-a14","cerrada":"2026-10-20","por":"Mostrador 1"}},"movimientos":{}}</script>
+<script>
+window.TS_LINKS = {"inicio": "/"};
+</script>
+<script>
+/* Núcleo compartido de Tecno-Spot.
+   Una sola capa de datos y reglas que usan las tres herramientas: el sitio
+   público (cotiza y agenda), el portal del cliente y la consola interna.
+   Cada herramienta es una vista distinta sobre los mismos registros; por eso
+   lo que agenda un cliente en el sitio aparece en los turnos de la consola. */
+(function(){
+'use strict';
+
+const SEED = JSON.parse(document.getElementById('datos').textContent);
+const COLS = ['config','modelos','tarifas','productos','costos','existencias','equipos','clientes','citas','ordenes','ventas','compras','movimientos'];
+const S = { perfiles:{}, ocupacion:{} }; COLS.forEach(c => { S[c] = {}; });
+const Store = { mode:'cargando', sb:null, loaded:{}, error:null, ultimaSync:null };
+/* Sesión en Supabase: la base decide el rol, no la pantalla. */
+const Auth = { session:null, perfil:null, vista:'entrar', error:'', aviso:'', form:{ correo:'', clave:'', nombre:'' }, ocupado:false };
+const LS_KEY = 'tecnospot-v1';
+const DAY = 86400000;
+
+/* ---------- catálogos fijos ---------- */
+const MARCAS = ['Apple','Samsung','Motorola','Xiaomi','Huawei','Honor','OPPO','Realme','ZTE'];
+const DONDE_MODELO = {
+  Apple:'En tu iPhone: Ajustes › General › Información › Nombre del modelo.',
+  otra:'En Android: Ajustes › Acerca del teléfono › Modelo.'
+};
+/* Lo que el cliente reconoce, en sus palabras. El id es el tipo de reparación. */
+const PROBLEMAS = [
+  { id:'pantalla', t:'Pantalla rota o no se ve', d:'Cristal estrellado, manchas, líneas de colores o no responde al tacto.', tip:'Si el cristal está astillado, ponle cinta transparente encima para no cortarte mientras llegas.' },
+  { id:'bateria', t:'La batería no me dura', d:'Se descarga rápido, se apaga solo o la batería se ve inflada.', tip:'En iPhone revisa Ajustes › Batería › Estado de la batería. Si la batería está inflada, deja de cargarlo.' },
+  { id:'carga', t:'No carga o carga lento', d:'El cable no entra bien, carga solo de ladito o no reconoce el cargador.', tip:'Prueba con otro cable y otro cargador: a veces el problema es el cable y no el celular.' },
+  { id:'bocina', t:'No se escucha', d:'La bocina o el auricular no suenan, hacen ruido o se oyen muy bajito.', tip:'Revisa que no esté en silencio ni conectado a audífonos Bluetooth.' },
+  { id:'microfono', t:'No me escuchan', d:'En llamadas o notas de voz no se oye tu voz o se oye cortada.', tip:'Graba una nota de voz con y sin funda: a veces la funda tapa el micrófono.' },
+  { id:'camara', t:'Falla la cámara', d:'Fotos borrosas, cámara en negro, no enfoca o el cristal de la cámara está roto.', tip:'Limpia el cristal de la cámara con un paño suave antes de traerlo.' },
+  { id:'tapa', t:'Tapa trasera rota', d:'Cristal trasero estrellado o carcasa dañada.', tip:'Una funda evita que se sigan desprendiendo pedazos de vidrio.' },
+  { id:'humedad', t:'Se mojó', d:'Se cayó al agua o se le derramó algo.', tip:'Apágalo, no lo cargues y no lo metas en arroz. Entre más pronto lo revisemos, mejor.', urgente:true },
+  { id:'botones', t:'Los botones no funcionan', d:'Encendido, volumen o silencio no responden.', tip:'' },
+  { id:'software', t:'Se traba o no prende bien', d:'Va lento, se reinicia solo, se quedó en el logo o necesitas respaldo o actualización.', tip:'Si puedes, respalda tus fotos antes de traerlo.' },
+  { id:'liberacion', t:'Liberar de compañía', d:'Para usarlo con cualquier operador.', tip:'Trae tu identificación y el comprobante de que el equipo es tuyo. Solo liberamos equipos sin reporte de robo.' },
+  { id:'mantenimiento', t:'Limpieza y mantenimiento', d:'Puerto de carga, bocinas y micrófono limpios, y revisión general.', tip:'' },
+  { id:'diagnostico', t:'No sé qué tiene', d:'Lo revisamos y te decimos qué necesita antes de hacer cualquier reparación.', tip:'Anota cuándo empezó la falla y qué pasó antes: un golpe, una actualización o si se mojó.' }
+];
+const PROB = {}; PROBLEMAS.forEach(p => { PROB[p.id] = p; });
+const GAMAS = { alta:'Gama alta', media:'Gama media', entrada:'Gama de entrada' };
+const MOTIVOS_CITA = { reparacion:'Reparación', entrega:'Recoger mi equipo', duda:'Duda o revisión', compra:'Comprar accesorio o celular', venta:'Vender o cambiar mi celular', garantia:'Garantía' };
+const ESTADOS_CITA = [['agendada','Agendada','info'],['llego','Llegó · en espera','warn'],['atendiendo','En atención','warn'],['atendida','Atendida','ok'],['noasistio','No asistió','muted'],['cancelada','Cancelada','muted']];
+const CIERRES_CITA = { cliente:'El cliente canceló', reprogramo:'Reprogramó en otra cita', duplicada:'Cita duplicada', otro:'Otro motivo' };
+const ESTADOS_ORDEN = [['recibido','Recibido','info'],['diagnostico','En diagnóstico','warn'],['presupuesto','Esperando autorización','warn'],['autorizado','Autorizado','info'],['reparacion','En reparación','warn'],['espera','Esperando refacción','warn'],['listo','Listo para entregar','ok'],['entregado','Entregado','muted'],['rechazado','No autorizado · por devolver','crit']];
+const RECHAZOS = { precio:'Precio', tiempo:'Tiempo de reparación', noconviene:'Prefiere comprar otro equipo', sinarreglo:'No tiene arreglo', otro:'Otro' };
+const MEDIOS = { mostrador:'En mostrador', whatsapp:'Por WhatsApp', telefono:'Por teléfono', sitio:'En el sitio (folio y celular)', portal:'En el portal del cliente' };
+const FORMAS_PAGO = { efectivo:'Efectivo', tarjeta:'Tarjeta', transferencia:'Transferencia' };
+const ROLES = { direccion:'Dirección', administracion:'Administración', mostrador:'Mostrador y ventas', tecnico:'Técnico' };
+const ROLES_CUENTA = Object.assign({ pendiente:'Pendiente de asignar', cliente:'Cliente (portal)' }, ROLES);
+const CATEGORIAS = { fundas:'Fundas', micas:'Micas de vidrio templado', privacidad:'Micas de privacidad', hidrogel:'Micas de hidrogel', cargadores:'Cargadores y cables', baterias:'Baterías portátiles', audio:'AirPods y audífonos', relojes:'Apple Watch y smartwatch', refacciones:'Refacciones' };
+const CHECKLIST = [['enciende','Enciende'],['pantalla','Pantalla y táctil'],['carga','Carga'],['bocina','Bocina y auricular'],['microfono','Micrófono'],['camaras','Cámaras'],['botones','Botones'],['biometria','Face ID o huella'],['senal','Señal y Wi-Fi'],['tapa','Tapa y marco sin daño']];
+const CHECK_VALS = { si:'Sí', no:'No', np:'No se pudo probar' };
+const ACCESORIOS_REC = ['Chip SIM','Memoria','Funda','Cargador','Caja'];
+const ESTADOS_EQUIPO = { reacondicionar:'Por reacondicionar', disponible:'Disponible', apartado:'Apartado', vendido:'Vendido' };
+const CONDICION_USADO = { nuevo:'Como nuevo', bueno:'Buen estado', detalles:'Con detalles', danado:'Dañado' };
+
+/* Valores de arranque. Lo que vale null se muestra "por confirmar" (regla 9). */
+const CFG0 = {
+  empresa:{ nombre:'Tecno-Spot', sucursal:'Tecmilenio', lugar:'Cafetería de Tecmilenio', lugarFrase:'la cafetería de Tecmilenio', direccion:null, whatsapp:null, telefono:null, correo:null, horario:null },
+  citas:{ dias:[1,2,3,4,5], inicio:'09:00', fin:'15:00', intervalo:30, cupo:2, diasVisibles:8, confirmado:false },
+  margenMinimo:30, margenConfirmado:false,
+  garantias:{}, garantiaEquipo:{ nuevo:null, seminuevo:null }, garantiaAccesorio:null,
+  diagnostico:{ precio:null },
+  domicilio:{ activo:false, costo:null, zona:null },
+  personal:{ tecnicos:['Técnico 1','Técnico 2'], mostrador:['Mostrador 1'] },
+  terminos:{ recepcion:null, garantia:null }
+};
+
+/* Estado de pantalla compartido; cada herramienta agrega el suyo. */
+const U = { app:'', rol:'direccion', persona:'', drawer:null, toast:null };
+
+/* ---------- utilidades ---------- */
+const $ = s => document.querySelector(s);
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone = x => JSON.parse(JSON.stringify(x == null ? null : x));
+const vals = o => Object.values(o || {});
+const ents = o => Object.entries(o || {});
+const pad = n => String(n).padStart(2, '0');
+const fmtMoney = n => new Intl.NumberFormat('es-MX', { style:'currency', currency:'MXN', minimumFractionDigits:0, maximumFractionDigits:2 }).format(n || 0);
+const fmtInt = n => new Intl.NumberFormat('es-MX').format(n || 0);
+const pctTxt = n => (Math.round(n * 10) / 10).toFixed(1) + '%';
+const isoLocal = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const hoyISO = () => isoLocal(new Date());
+const fechaDe = iso => new Date(iso + 'T12:00:00');
+function sumarDias(iso, n){ const d = fechaDe(iso); d.setDate(d.getDate() + n); return isoLocal(d); }
+const difDias = (a, b) => Math.round((fechaDe(a) - fechaDe(b)) / DAY);
+function fmtD(iso){ if (!/^\d{4}-\d{2}-\d{2}/.test(iso || '')) return '—'; const p = iso.slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+const fmtDia = iso => fechaDe(iso).toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long' });
+const fmtDiaCorto = iso => fechaDe(iso).toLocaleDateString('es-MX', { weekday:'short', day:'numeric', month:'short' }).replace(/\./g, '');
+const ahoraHM = () => { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const aMin = hm => { const p = String(hm || '0:0').split(':').map(Number); return p[0] * 60 + (p[1] || 0); };
+const deMin = m => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+const digitos = t => String(t || '').replace(/\D/g, '').slice(-10);
+const telTxt = t => { const d = digitos(t); return d.length === 10 ? d.slice(0, 2) + ' ' + d.slice(2, 6) + ' ' + d.slice(6) : (t || ''); };
+const slug = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function uid(p){ return p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+const LETRAS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function nuevoFolio(pref){ const d = new Date(); let r = ''; for (let i = 0; i < 4; i++) r += LETRAS[Math.floor(Math.random() * LETRAS.length)]; return pref + '-' + String(d.getFullYear()).slice(2) + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + r; }
+function setPath(o, path, v){ const k = path.split('.'); let t = o; for (let i = 0; i < k.length - 1; i++){ if (t[k[i]] == null) t[k[i]] = {}; t = t[k[i]]; } t[k[k.length - 1]] = v; }
+function getPath(o, path){ return path.split('.').reduce((t, k) => (t == null ? undefined : t[k]), o); }
+const PC = '<span class="tag pc">por confirmar</span>';
+const DEMO_TAG = '<span class="tag demo">demo</span>';
+const chip = (k, t) => '<span class="chip ' + k + '">' + esc(t) + '</span>';
+const precioTxt = n => n == null || n === '' ? PC : fmtMoney(n);
+function waLink(tel, texto){ const d = digitos(tel); return d.length === 10 ? 'https://wa.me/52' + d + '?text=' + encodeURIComponent(texto) : null; }
+const estadoDe = (lista, k) => lista.find(e => e[0] === k) || [k, k, 'muted'];
+
+/* ---------- configuración ---------- */
+function mezclar(base, extra){
+  const out = clone(base);
+  ents(extra).forEach(([k, v]) => { out[k] = v && typeof v === 'object' && !Array.isArray(v) && out[k] && typeof out[k] === 'object' && !Array.isArray(out[k]) ? mezclar(out[k], v) : v; });
+  return out;
+}
+function cfg(){ return mezclar(CFG0, S.config.general || {}); }
+const empresa = () => cfg().empresa;
+function garantiaDias(problema, tarifa){
+  if (tarifa && tarifa.garantiaDias != null) return tarifa.garantiaDias;
+  const g = cfg().garantias[problema]; return g == null ? null : g;
+}
+
+/* ---------- almacenamiento ---------- */
+/* Los datos de demostración traen fechas fijas; se recorren para que "hoy" siempre tenga turnos. */
+function anclar(data){
+  const a = data._ancla; if (!a) return data;
+  const n = difDias(hoyISO(), a); if (!n) return data;
+  return JSON.parse(JSON.stringify(data).replace(/"(\d{4}-\d{2}-\d{2})"/g, (m, d) => '"' + sumarDias(d, n) + '"'));
+}
+function loadLocal(){
+  let data = null;
+  try { const raw = localStorage.getItem(LS_KEY); if (raw) data = JSON.parse(raw); } catch (e) { data = null; }
+  if (!data) data = anclar(clone(SEED));
+  COLS.forEach(c => { S[c] = data[c] || {}; Store.loaded[c] = true; });
+  Store.ultimaSync = Date.now();
+}
+function saveLocal(){ const d = {}; COLS.forEach(c => { d[c] = S[c]; }); try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch (e) {} }
+/* Otra pestaña con otra herramienta abierta (modo local) escribe en el mismo almacenamiento. */
+window.addEventListener('storage', e => { if (e.key === LS_KEY && Store.mode === 'local'){ loadLocal(); scheduleRender(); } });
+function resetDemo(){ const d = anclar(clone(SEED)); COLS.forEach(c => { S[c] = d[c] || {}; }); saveLocal(); scheduleRender(); }
+
+const chains = {};
+function put(col, id, data){
+  if (data === null) delete S[col][id]; else S[col][id] = data;
+  scheduleRender();
+  if (Store.sb){
+    const k = col + '/' + id, t = Store.sb.from(col);
+    const q = () => data === null ? t.delete().eq('id', id) : col === 'movimientos' ? t.insert({ id, data }) : t.upsert({ id, data });
+    const p = (chains[k] || Promise.resolve()).then(q).then(r => { if (r && r.error) onWriteError(r.error); }).catch(onWriteError);
+    chains[k] = p; return p;
+  }
+  saveLocal(); return Promise.resolve();
+}
+function onWriteError(e){
+  const code = e && e.code;
+  toast(code === '42501' ? 'Tu rol no puede hacer este cambio. Lo decide la base de datos.' : 'No se pudo guardar: ' + ((e && e.message) || 'revisa la conexión') + '.', 'crit');
+}
+function quien(){
+  const base = U.persona || ROLES[U.rol] || 'Equipo';
+  const p = Auth.perfil; return p && Store.mode === 'supabase' ? (p.nombre || p.correo || base) : base;
+}
+function logMov(m){ put('movimientos', uid('mv'), Object.assign({ ts:Date.now(), fecha:hoyISO(), usuario:quien() }, m)); }
+
+/* ---------- Supabase ---------- */
+const SBCFG = window.TS_SUPABASE || null;
+function acceso(){ const a = actual(); return (a && a.acceso) || 'publico'; }
+function rolCuenta(){ return Auth.perfil ? Auth.perfil.rol : null; }
+const esInterno = () => !!ROLES[rolCuenta()];
+/* ¿La cuenta que entró puede usar esta herramienta? */
+function accesoOk(){
+  if (Store.mode !== 'supabase' || acceso() === 'publico') return true;
+  if (!Auth.session || !Auth.perfil) return false;
+  return acceso() === 'interno' ? esInterno() : (rolCuenta() === 'cliente' && !!Auth.perfil.cliente_id);
+}
+const PUBLICAS = ['config','modelos','tarifas','productos','existencias'];
+function colsPara(){
+  const a = acceso();
+  if (a === 'publico' || !accesoOk()) return PUBLICAS.slice();
+  if (a === 'cliente') return PUBLICAS.concat(['clientes','citas','ordenes','ventas']);
+  return COLS.slice();
+}
+async function cargar(){
+  const sb = Store.sb; COLS.forEach(c => { S[c] = {}; Store.loaded[c] = false; }); S.perfiles = {};
+  const cols = colsPara();
+  const tareas = cols.map(async c => {
+    let q = sb.from(c).select('id,data');
+    if (c === 'movimientos') q = q.order('actualizado', { ascending:false }).limit(400);
+    const r = await q; if (r.error) throw r.error;
+    const m = {}; (r.data || []).forEach(x => { m[x.id] = x.data; }); S[c] = m;
+  });
+  /* Afuera, los celulares a la venta llegan sin IMEI ni costo. */
+  if (acceso() !== 'interno' || !accesoOk()) tareas.push(sb.rpc('ts_tienda').then(r => { if (r.error) throw r.error; const m = {}; (r.data || []).forEach(x => { m[x.id] = x.data; }); S.equipos = m; }));
+  if (rolCuenta() === 'direccion' && acceso() === 'interno') tareas.push(sb.from('perfiles').select('*').then(r => { if (!r.error) (r.data || []).forEach(x => { S.perfiles[x.user_id] = x; }); }));
+  try { await Promise.all(tareas); Store.error = null; } catch (e) { Store.error = (e && e.message) || 'sin conexión'; }
+  COLS.forEach(c => { Store.loaded[c] = true; });
+  Store.ultimaSync = Date.now();
+  escuchar(cols);
+  scheduleRender();
+}
+let canal = null;
+function escuchar(cols){
+  const sb = Store.sb; if (canal){ sb.removeChannel(canal); canal = null; }
+  canal = sb.channel('ts-' + Math.random().toString(36).slice(2));
+  const tablas = cols.filter(t => !(t === 'equipos' && acceso() !== 'interno')).concat(rolCuenta() === 'direccion' && acceso() === 'interno' && accesoOk() ? ['perfiles'] : []);
+  tablas.forEach(t => canal.on('postgres_changes', { event:'*', schema:'public', table:t }, ev => {
+    if (t === 'perfiles'){ const row = ev.new && ev.new.user_id ? ev.new : null; if (row) S.perfiles[row.user_id] = row; else if (ev.old) delete S.perfiles[ev.old.user_id]; }
+    else if (ev.eventType === 'DELETE'){ if (ev.old) delete S[t][ev.old.id]; }
+    else if (ev.new){ S[t][ev.new.id] = ev.new.data; }
+    Store.ultimaSync = Date.now(); scheduleRender();
+  }));
+  canal.subscribe();
+}
+async function leerPerfil(){
+  Auth.perfil = null;
+  if (!Auth.session) return;
+  const r = await Store.sb.from('perfiles').select('*').eq('user_id', Auth.session.user.id).maybeSingle();
+  Auth.perfil = r.data || { rol:'pendiente', correo:Auth.session.user.email };
+  if (esInterno()){ U.rol = Auth.perfil.rol; U.persona = Auth.perfil.nombre || ''; }
+  if (Auth.perfil.rol === 'cliente') U.pCliente = Auth.perfil.cliente_id || '';
+}
+async function iniciarSupabase(){
+  const sb = window.supabase.createClient(SBCFG.url, SBCFG.key);
+  Store.sb = sb; Store.mode = 'supabase';
+  const r = await sb.auth.getSession(); Auth.session = r.data ? r.data.session : null;
+  await leerPerfil();
+  await cargar();
+  sb.auth.onAuthStateChange((ev, session) => {
+    const antes = Auth.session && Auth.session.user.id, ahora = session && session.user.id;
+    Auth.session = session;
+    if (antes !== ahora) setTimeout(async () => { await leerPerfil(); await cargar(); }, 0);
+  });
+}
+async function rpc(fn, args){ const r = await Store.sb.rpc(fn, args); if (r.error) throw new Error(r.error.message); return r.data; }
+
+/* Pantalla de acceso común para portal y consola. */
+function vAcceso(){
+  const interno = acceso() === 'interno', F = Auth.form, E = empresa();
+  const titulo = interno ? 'Consola interna' : 'Mi cuenta';
+  if (Auth.session && Auth.perfil){
+    const p = Auth.perfil;
+    const msg = interno
+      ? (p.rol === 'cliente' ? 'Esta cuenta es de cliente. Entra por “Mi cuenta” en el sitio.' : 'Tu cuenta existe, pero dirección todavía no le asigna un rol. En cuanto lo haga, esta pantalla se abre sola.')
+      : (esInterno() ? 'Esta cuenta es del equipo de ' + E.nombre + '. Usa la consola interna.' : 'Recibimos tu registro. En tu próxima visita, en mostrador ligan tu cuenta con tu celular; en cuanto lo hagan, esta pantalla se abre sola.');
+    return '<div class="login panel">' + logo('grande') + '<h1>' + titulo + '</h1><p><b>' + esc(p.correo || Auth.session.user.email) + '</b> · ' + esc(ROLES_CUENTA[p.rol] || p.rol) + '</p><p class="muted">' + msg + '</p><div><button class="btn" type="button" data-act="ts-salir">Salir</button></div></div>';
+  }
+  const reg = Auth.vista === 'registro';
+  return '<div class="login panel">' + logo('grande') + '<h1>' + titulo + '</h1>'
+    + '<p class="muted">' + (interno ? 'Acceso para el equipo de ' + esc(E.nombre) + '. Lo que ve cada quien depende de su rol: costos y utilidad solo dirección y administración.' : 'Tus reparaciones, tus citas, tus equipos con su garantía y tus compras.') + '</p>'
+    + '<form class="stack" data-form="ts-' + (reg ? 'registro' : 'entrar') + '">'
+    + (reg ? '<label class="f" for="ts-nom">Nombre completo<input id="ts-nom" autocomplete="name" data-bind="tsForm.nombre" value="' + esc(F.nombre) + '"></label>' : '')
+    + '<label class="f" for="ts-mail">Correo<input id="ts-mail" type="email" autocomplete="email" data-bind="tsForm.correo" value="' + esc(F.correo) + '"></label>'
+    + '<label class="f" for="ts-pass">Contraseña<input id="ts-pass" type="password" autocomplete="' + (reg ? 'new-password' : 'current-password') + '" data-bind="tsForm.clave" value="' + esc(F.clave) + '"></label>'
+    + (Auth.error ? '<p class="err" role="alert">' + esc(Auth.error) + '</p>' : '') + (Auth.aviso ? '<p class="small" role="status">' + esc(Auth.aviso) + '</p>' : '')
+    + '<button class="btn primary" type="submit"' + (Auth.ocupado ? ' disabled' : '') + '>' + (reg ? 'Crear cuenta' : 'Entrar') + '</button></form>'
+    + '<p class="small">' + (reg ? '¿Ya tienes cuenta? <button class="linkbtn" type="button" data-act="ts-vista" data-v="entrar">Entrar</button>' : '¿Primera vez? <button class="linkbtn" type="button" data-act="ts-vista" data-v="registro">Crear cuenta</button>') + '</p>'
+    + '<p class="note">' + (interno ? 'Las cuentas nuevas quedan pendientes hasta que dirección les asigna un rol.' : 'Para ver tu equipo sin cuenta usa “Mi cita y mi equipo” con tu folio y tu celular.') + '</p></div>';
+}
+const TS_ACT = {
+  'ts-vista'(d){ Auth.vista = d.v; Auth.error = ''; Auth.aviso = ''; scheduleRender(); },
+  async 'ts-salir'(){ if (Store.sb) await Store.sb.auth.signOut(); Auth.session = null; Auth.perfil = null; Auth.form.clave = ''; await cargar(); }
+};
+const TS_FORM = {
+  async 'ts-entrar'(){
+    const F = Auth.form; if (!F.correo.trim() || !F.clave){ Auth.error = 'Escribe tu correo y tu contraseña.'; return scheduleRender(); }
+    Auth.ocupado = true; Auth.error = ''; scheduleRender();
+    const r = await Store.sb.auth.signInWithPassword({ email:F.correo.trim(), password:F.clave });
+    Auth.ocupado = false;
+    if (r.error){ Auth.error = /confirm/i.test(r.error.message) ? 'Confirma tu correo con el enlace que te enviamos y vuelve a entrar.' : 'Correo o contraseña incorrectos.'; return scheduleRender(); }
+    F.clave = '';
+  },
+  async 'ts-registro'(){
+    const F = Auth.form;
+    if (!F.nombre.trim() || !F.correo.trim()){ Auth.error = 'Escribe tu nombre y tu correo.'; return scheduleRender(); }
+    if ((F.clave || '').length < 8){ Auth.error = 'La contraseña necesita al menos 8 caracteres.'; return scheduleRender(); }
+    Auth.ocupado = true; Auth.error = ''; scheduleRender();
+    const r = await Store.sb.auth.signUp({ email:F.correo.trim(), password:F.clave, options:{ data:{ nombre:F.nombre.trim() }, emailRedirectTo: location.href.split('#')[0] } });
+    Auth.ocupado = false;
+    if (r.error){ Auth.error = 'No se pudo crear la cuenta: ' + r.error.message; return scheduleRender(); }
+    F.clave = '';
+    if (!r.data.session){ Auth.vista = 'entrar'; Auth.aviso = 'Te enviamos un correo para confirmar tu cuenta. Después entra con tu contraseña.'; }
+    scheduleRender();
+  }
+};
+function guardarPerfil(userId, cambios){
+  S.perfiles[userId] = Object.assign({}, S.perfiles[userId], cambios); scheduleRender();
+  return Store.sb.from('perfiles').update(cambios).eq('user_id', userId).then(r => { if (r.error) onWriteError(r.error); else toast('Acceso actualizado.'); });
+}
+
+/* ---------- catálogo: modelos y tarifas ---------- */
+function modelosDe(marca){
+  return ents(S.modelos).filter(([, m]) => m.marca === marca && !m.oculto).sort((a, b) => (a[1].orden || 0) - (b[1].orden || 0) || a[1].modelo.localeCompare(b[1].modelo, 'es'));
+}
+const marcasActivas = () => MARCAS.concat([...new Set(vals(S.modelos).map(m => m.marca))].filter(m => !MARCAS.includes(m)));
+function nombreModelo(id, texto){ const m = S.modelos[id]; return m ? m.marca + ' ' + m.modelo : (texto || 'Modelo por confirmar'); }
+const tarifaId = (modeloId, problema, calidad) => modeloId + '|' + problema + '|' + (slug(calidad) || 'unica');
+function tarifasDe(modeloId, problema){
+  return ents(S.tarifas).filter(([, t]) => t.modeloId === modeloId && t.problema === problema && !t.oculta)
+    .sort((a, b) => (a[1].precio == null ? 1e12 : a[1].precio) - (b[1].precio == null ? 1e12 : b[1].precio));
+}
+/* La cotización que ve el cliente: solo lo que la tienda ya cargó; lo demás, por confirmar. */
+function cotizar(modeloId, problema){
+  const ops = modeloId ? tarifasDe(modeloId, problema).map(([id, t]) => ({ tarifaId:id, calidad:t.calidad || '', precio:t.precio == null ? null : +t.precio, tiempo:t.tiempo || null, garantia:garantiaDias(problema, t), demo:!!t.demo })) : [];
+  return { problema, opciones:ops, garantia:garantiaDias(problema), diagnostico:cfg().diagnostico.precio };
+}
+
+/* ---------- citas y turnos ---------- */
+function horasDelDia(fecha){
+  const c = cfg().citas;
+  if (!(c.dias || []).includes(fechaDe(fecha).getDay())) return [];
+  const out = []; const fin = aMin(c.fin), paso = Math.max(10, +c.intervalo || 30);
+  for (let m = aMin(c.inicio); m + paso <= fin; m += paso) out.push(deMin(m));
+  return out;
+}
+const citaActiva = c => c.estado !== 'cancelada';
+function ocupacionDe(fecha){
+  if (Store.mode === 'supabase' && acceso() !== 'interno') return S.ocupacion[fecha] || {};
+  const m = {}; vals(S.citas).forEach(c => { if (c.fecha === fecha && citaActiva(c) && c.hora) m[c.hora] = (m[c.hora] || 0) + 1; }); return m;
+}
+/* Horarios del día con lugares libres; hoy no ofrece horas que ya pasaron. */
+function horarios(fecha){
+  const occ = ocupacionDe(fecha), cupo = +cfg().citas.cupo || 1, ahora = fecha === hoyISO() ? aMin(ahoraHM()) + 15 : -1;
+  return horasDelDia(fecha).map(h => ({ hora:h, libres:Math.max(0, cupo - (occ[h] || 0)), pasada:aMin(h) < ahora }));
+}
+function diasAgenda(){
+  const n = +cfg().citas.diasVisibles || 8, out = []; let d = hoyISO();
+  for (let i = 0; out.length < n && i < 40; i++, d = sumarDias(d, 1)) if (horarios(d).some(h => !h.pasada)) out.push(d);
+  return out;
+}
+async function cargarOcupacion(){
+  if (!Store.sb || acceso() === 'interno') return;
+  const dias = diasAgenda(); if (!dias.length) return;
+  try {
+    const r = await rpc('ts_horarios', { desde:dias[0], hasta:dias[dias.length - 1] });
+    S.ocupacion = {}; (r || []).forEach(x => { (S.ocupacion[x.fecha] = S.ocupacion[x.fecha] || {})[x.hora] = x.n; });
+    scheduleRender();
+  } catch (e) { Store.error = e.message; }
+}
+const siguienteTurno = fecha => vals(S.citas).filter(c => c.fecha === fecha).reduce((a, c) => Math.max(a, +c.turno || 0), 0) + 1;
+function historialCita(c, nota){ c.historial = (c.historial || []).concat([{ fecha:hoyISO(), hora:ahoraHM(), autor:quien(), nota }]); }
+/* Agenda una cita y le da su turno del día. Afuera pasa por la base (ts_agendar). */
+async function agendar(d){
+  if (Store.sb) return rpc('ts_agendar', { p:d });
+  const h = horarios(d.fecha).find(x => x.hora === d.hora);
+  if (!h || h.pasada) throw new Error('Ese horario ya no está disponible. Elige otro.');
+  if (!h.libres) throw new Error('Ese horario se acaba de llenar. Elige otro.');
+  if ((d.contacto.nombre || '').trim().length < 2 || digitos(d.contacto.tel).length !== 10) throw new Error('Escribe tu nombre y un celular de 10 dígitos.');
+  const c = crearCita(Object.assign({ origen:'sitio' }, d));
+  return { folio:c.folio, fecha:c.fecha, hora:c.hora, turno:c.turno, lugar:c.lugar };
+}
+function crearCita(d){
+  const id = uid('ct'), E = empresa();
+  const c = Object.assign({ folio:nuevoFolio('CT'), motivo:'reparacion', modalidad:'cafeteria', lugar:E.lugar, clienteId:null, cotizacion:null, nota:'', estado:'agendada', origen:'mostrador', creada:hoyISO() }, d);
+  c.turno = siguienteTurno(c.fecha);
+  c.contacto = { nombre:(d.contacto.nombre || '').trim(), tel:digitos(d.contacto.tel), correo:(d.contacto.correo || '').trim(), tecmi:!!d.contacto.tecmi };
+  if (!c.clienteId){ const cl = clientePorTel(c.contacto.tel); if (cl) c.clienteId = cl[0]; }
+  historialCita(c, 'Cita agendada · ' + (c.origen === 'sitio' ? 'desde el sitio' : c.origen === 'portal' ? 'desde el portal' : 'en mostrador'));
+  put('citas', id, c);
+  return Object.assign({ id }, c);
+}
+function citaEdit(id, fn){ const c = clone(S.citas[id]); if (!c) return; if (fn(c) === false) return; put('citas', id, c); }
+function nombreCita(c){ const cl = S.clientes[c.clienteId]; return cl ? cl.nombre : (c.contacto && c.contacto.nombre) || 'Sin nombre'; }
+
+/* ---------- clientes ---------- */
+function clientePorTel(tel){ const d = digitos(tel); return d.length === 10 ? ents(S.clientes).find(([, c]) => digitos(c.tel) === d) || null : null; }
+function crearCliente(d){
+  const id = uid('cl');
+  put('clientes', id, { nombre:(d.nombre || '').trim(), tel:digitos(d.tel), correo:(d.correo || '').trim(), tecmi:!!d.tecmi, alta:hoyISO(), dispositivos:[], bitacora:[] });
+  return id;
+}
+function bitacora(cid, entry){
+  if (!S.clientes[cid]) return;
+  const c = clone(S.clientes[cid]);
+  c.bitacora = [Object.assign({ fecha:hoyISO(), autor:quien() }, entry)].concat(c.bitacora || []).slice(0, 150);
+  put('clientes', cid, c);
+}
+/* Regla 6: el equipo entregado o vendido queda en la ficha del cliente con su IMEI. */
+function registrarDispositivo(cid, disp){
+  const c = clone(S.clientes[cid]); if (!c) return;
+  c.dispositivos = c.dispositivos || [];
+  const i = disp.imei ? c.dispositivos.findIndex(x => x.imei === disp.imei) : -1;
+  const reg = Object.assign({ id:uid('eq'), alta:hoyISO() }, i >= 0 ? c.dispositivos[i] : {}, disp);
+  if (i >= 0) c.dispositivos[i] = reg; else c.dispositivos.push(reg);
+  put('clientes', cid, c);
+}
+const nombreCliente = id => (S.clientes[id] && S.clientes[id].nombre) || 'Cliente sin registro';
+
+/* ---------- costos y utilidad (regla 4) ---------- */
+const verCostos = () => U.rol === 'direccion' || U.rol === 'administracion';
+function costo(id){ const c = S.costos[id]; return c && c.costo != null && c.costo !== '' ? +c.costo : null; }
+const montoLineas = ls => (ls || []).reduce((a, l) => a + (+l.precio || 0) * (+l.cant || 0), 0);
+const sinPrecio = ls => (ls || []).some(l => l.precio == null || l.precio === '');
+/* Utilidad = venta − costo de refacciones y productos. La mano de obra no tiene costo de inventario. */
+function utilidad(ls){
+  let venta = 0, cst = 0, faltan = 0;
+  for (const l of ls || []){
+    if (l.precio == null || l.precio === '') { faltan++; continue; }
+    venta += (+l.precio || 0) * (+l.cant || 0);
+    const ref = l.equipoId || l.productoId;
+    if (ref){ const c = costo(ref); if (c == null) faltan++; else cst += c * (+l.cant || 0); }
+  }
+  return venta ? { venta, util:venta - cst, pct:(venta - cst) / venta * 100, faltan } : { faltan, venta:0 };
+}
+function bajoMargen(ls){ const u = utilidad(ls); return u.pct != null && !u.faltan ? u.pct < cfg().margenMinimo : null; }
+
+/* ---------- inventario (regla 5) ---------- */
+function ex(pid){ const e = S.existencias[pid] || {}; return { disp:+e.disp || 0, apart:+e.apart || 0, min:e.min == null ? null : +e.min }; }
+function setEx(pid, e){ put('existencias', pid, Object.assign({}, S.existencias[pid] || {}, e)); }
+const prodNombre = pid => (S.productos[pid] && S.productos[pid].nombre) || 'Producto sin registro';
+const lineasInventario = o => (o.lineas || []).filter(l => l.productoId && S.productos[l.productoId]);
+/* Al autorizar se apartan las refacciones; regresa cuántas piezas faltan. */
+function apartarOrden(o){
+  let falt = 0;
+  lineasInventario(o).forEach(l => {
+    const need = (+l.cant || 0) - (+l.apartado || 0); if (need <= 0) return;
+    const e = ex(l.productoId), take = Math.min(need, e.disp);
+    if (take > 0){ setEx(l.productoId, { disp:e.disp - take, apart:e.apart + take }); logMov({ tipo:'apartado', productoId:l.productoId, cant:take, ref:o.folio, motivo:'Presupuesto autorizado' }); }
+    l.apartado = (+l.apartado || 0) + take; falt += need - take;
+  });
+  return falt;
+}
+function liberarOrden(o, motivo){
+  lineasInventario(o).forEach(l => {
+    const a = +l.apartado || 0; if (!a) return;
+    const e = ex(l.productoId); setEx(l.productoId, { disp:e.disp + a, apart:Math.max(0, e.apart - a) });
+    l.apartado = 0; logMov({ tipo:'liberado', productoId:l.productoId, cant:a, ref:o.folio, motivo:motivo || 'Orden sin reparar' });
+  });
+}
+/* Al terminar la reparación se descuentan; si el sistema no tiene la pieza, primero se registra su entrada. */
+function descontarOrden(o){
+  const faltan = [];
+  lineasInventario(o).forEach(l => { const e = ex(l.productoId), need = +l.cant || 0, ap = Math.min(+l.apartado || 0, e.apart); if (ap + e.disp < need) faltan.push(prodNombre(l.productoId)); });
+  if (faltan.length) return 'No hay existencia registrada de: ' + faltan.join(', ') + '. Registra su entrada en Inventario antes de terminar.';
+  lineasInventario(o).forEach(l => {
+    const e = ex(l.productoId), need = +l.cant || 0, ap = Math.min(+l.apartado || 0, e.apart, need);
+    setEx(l.productoId, { apart:e.apart - ap, disp:e.disp - (need - ap) });
+    l.apartado = 0; l.instalado = need;
+    logMov({ tipo:'instalado', productoId:l.productoId, cant:need, ref:o.folio, motivo:'Reparación terminada' });
+  });
+  return null;
+}
+
+/* ---------- órdenes de servicio ---------- */
+const totalOrden = o => montoLineas(o.lineas);
+const pagadoOrden = o => (o.pagos || []).reduce((a, p) => a + (+p.monto || 0), 0);
+const saldoOrden = o => Math.max(0, totalOrden(o) - pagadoOrden(o));
+const ordenAbierta = o => o.estado !== 'entregado';
+const equipoTxt = e => e ? nombreModelo(e.modeloId, (e.marca ? e.marca + ' ' : '') + (e.modelo || '')) : 'Equipo';
+function hist(o, nota, publico){ o.historial = (o.historial || []).concat([{ fecha:hoyISO(), hora:ahoraHM(), autor:quien(), nota, publico:!!publico }]); }
+function crearOrden(data){
+  const id = uid('os');
+  const o = Object.assign({ folio:nuevoFolio('OS'), clienteId:null, citaId:null, origen:'mostrador', modalidad:'cafeteria', equipo:{}, problema:'diagnostico', falla:'', recepcion:{}, diagnostico:'', lineas:[], autorizacion:{ estado:'pendiente' }, estado:'recibido', tecnico:'', promesa:null, pagos:[], historial:[], creada:hoyISO(), actualizada:hoyISO() }, data);
+  hist(o, 'Equipo recibido en ' + (o.modalidad === 'domicilio' ? 'recolección a domicilio' : empresa().lugar), true);
+  put('ordenes', id, o);
+  if (o.clienteId) bitacora(o.clienteId, { tipo:'Orden de servicio', nota:'Recibimos ' + equipoTxt(o.equipo) + ' · ' + (PROB[o.problema] ? PROB[o.problema].t : o.problema) + ' · ' + o.folio });
+  return { id, o };
+}
+function ordenEdit(id, fn){ const o = clone(S.ordenes[id]); if (!o) return false; if (fn(o) === false) return false; o.actualizada = hoyISO(); put('ordenes', id, o); return true; }
+/* Regla 3: sin autorización no se repara. Queda quién, cuándo y por qué medio. */
+function autorizar(o, decision, medio, motivo, autor){
+  if (decision === 'si'){
+    o.autorizacion = { estado:'autorizado', medio, fecha:hoyISO(), hora:ahoraHM(), por:autor || quien(), monto:totalOrden(o) };
+    const falt = apartarOrden(o);
+    o.estado = falt ? 'espera' : 'autorizado';
+    hist(o, 'Presupuesto autorizado (' + (MEDIOS[medio] || medio) + ') por ' + fmtMoney(totalOrden(o)) + (falt ? ' · esperando ' + falt + ' refacción(es)' : ''), true);
+  } else {
+    o.autorizacion = { estado:'rechazado', medio, fecha:hoyISO(), hora:ahoraHM(), por:autor || quien(), motivo };
+    liberarOrden(o, 'Presupuesto no autorizado');
+    o.estado = 'rechazado';
+    hist(o, 'Presupuesto no autorizado · ' + (RECHAZOS[motivo] || motivo || 'sin motivo') + ' · el equipo se devuelve', true);
+  }
+}
+/* Regla 6: entregar cobra el saldo, fija la garantía, registra el equipo y borra el código de desbloqueo. */
+function entregar(id, d){
+  let err = null, oFinal = null;
+  ordenEdit(id, o => {
+    const reparado = o.estado === 'listo';
+    if (!reparado && o.estado !== 'rechazado'){ err = 'Solo se entrega un equipo listo o uno que no se autorizó reparar.'; return false; }
+    if (d.pago && +d.pago.monto > 0) o.pagos = (o.pagos || []).concat([{ fecha:hoyISO(), hora:ahoraHM(), monto:+d.pago.monto, forma:d.pago.forma, concepto:'Liquidación', por:quien() }]);
+    if (reparado && saldoOrden(o) > 0){ err = 'Falta cobrar ' + fmtMoney(saldoOrden(o)) + ' antes de entregar.'; return false; }
+    if (reparado && !(+d.garantiaDias > 0)){ err = 'Escribe los días de garantía de esta reparación.'; return false; }
+    if (!(d.recibio || '').trim()){ err = 'Escribe quién recibe el equipo.'; return false; }
+    const hasta = reparado ? sumarDias(hoyISO(), +d.garantiaDias) : null;
+    o.entrega = { fecha:hoyISO(), hora:ahoraHM(), por:quien(), recibio:d.recibio.trim(), pruebas:d.pruebas || {}, reparado, garantiaDias:reparado ? +d.garantiaDias : 0, garantiaHasta:hasta };
+    o.equipo = Object.assign({}, o.equipo, { acceso:'', accesoBorrado:!!(o.equipo && o.equipo.acceso) });
+    o.estado = 'entregado';
+    hist(o, reparado ? 'Equipo entregado a ' + d.recibio.trim() + ' · garantía hasta ' + fmtD(hasta) : 'Equipo devuelto sin reparar a ' + d.recibio.trim(), true);
+    oFinal = o;
+  });
+  if (err) return err;
+  if (oFinal.clienteId){
+    if (oFinal.entrega.reparado) registrarDispositivo(oFinal.clienteId, { marca:oFinal.equipo.marca, modelo:oFinal.equipo.modelo, modeloId:oFinal.equipo.modeloId, imei:oFinal.equipo.imei, color:oFinal.equipo.color, origen:'Reparación', ref:oFinal.folio, garantiaHasta:oFinal.entrega.garantiaHasta });
+    bitacora(oFinal.clienteId, { tipo:'Entrega', nota:(oFinal.entrega.reparado ? 'Entregado reparado · garantía hasta ' + fmtD(oFinal.entrega.garantiaHasta) : 'Devuelto sin reparar') + ' · ' + oFinal.folio });
+  }
+  return null;
+}
+function reclamoGarantia(id, nota){
+  const o = S.ordenes[id]; if (!o) return null;
+  const r = crearOrden({ clienteId:o.clienteId, equipo:Object.assign({}, o.equipo, { acceso:'' }), problema:o.problema, falla:'Reclamo de garantía de ' + o.folio + ': ' + (nota || ''), garantiaDe:id, origen:'garantia', recepcion:{ checklist:{}, accesorios:[], aceptaTerminos:true } });
+  ordenEdit(r.id, x => { hist(x, 'Reclamo de garantía de la orden ' + o.folio, true); });
+  return r;
+}
+
+/* ---------- garantías ---------- */
+function garantias(){
+  const out = [], hoy = hoyISO();
+  ents(S.ordenes).forEach(([id, o]) => { if (o.entrega && o.entrega.garantiaHasta) out.push({ tipo:'Reparación', id, folio:o.folio, clienteId:o.clienteId, equipo:equipoTxt(o.equipo), imei:o.equipo.imei, desde:o.entrega.fecha, hasta:o.entrega.garantiaHasta, dias:difDias(o.entrega.garantiaHasta, hoy), problema:o.problema, reclamos:vals(S.ordenes).filter(x => x.garantiaDe === id) }); });
+  ents(S.ventas).forEach(([id, v]) => (v.lineas || []).forEach(l => { if (l.garantiaHasta) out.push({ tipo:l.equipoId ? 'Equipo vendido' : 'Accesorio', id, folio:v.folio, clienteId:v.clienteId, equipo:l.desc, imei:l.imei || '', desde:v.fecha, hasta:l.garantiaHasta, dias:difDias(l.garantiaHasta, hoy), reclamos:[] }); }));
+  return out.sort((a, b) => a.dias - b.dias);
+}
+
+/* ---------- ventas, compras y caja ---------- */
+function registrarVenta(d){
+  const lineas = d.lineas || [];
+  if (!lineas.length) return { err:'Agrega al menos un producto.' };
+  if (sinPrecio(lineas)) return { err:'Hay productos sin precio. Escribe el precio antes de cobrar.' };
+  for (const l of lineas){
+    if (l.productoId && ex(l.productoId).disp < (+l.cant || 0)) return { err:'No hay existencia suficiente de ' + prodNombre(l.productoId) + '.' };
+    if (l.equipoId && (S.equipos[l.equipoId] || {}).estado !== 'disponible' && (S.equipos[l.equipoId] || {}).estado !== 'apartado') return { err:'Ese celular ya no está disponible.' };
+  }
+  const credito = d.tomaId ? +(S.compras[d.tomaId] || {}).precio || 0 : 0;
+  const total = montoLineas(lineas), cobrar = Math.max(0, total - credito);
+  const pagado = (d.pagos || []).reduce((a, p) => a + (+p.monto || 0), 0);
+  if (pagado < cobrar) return { err:'Falta cobrar ' + fmtMoney(cobrar - pagado) + '.' };
+  const id = uid('vt'), folio = nuevoFolio('V'), hoy = hoyISO();
+  const ls = lineas.map(l => {
+    const x = Object.assign({}, l);
+    if (l.equipoId){ const q = S.equipos[l.equipoId]; const g = cfg().garantiaEquipo[q.condicion === 'nuevo' ? 'nuevo' : 'seminuevo']; const dias = l.garantiaDias != null && l.garantiaDias !== '' ? +l.garantiaDias : g; x.imei = q.imei; x.garantiaDias = dias; x.garantiaHasta = dias ? sumarDias(hoy, dias) : null; }
+    return x;
+  });
+  const v = { folio, fecha:hoy, hora:ahoraHM(), clienteId:d.clienteId || null, lineas:ls, total, tomaId:d.tomaId || null, credito, pagos:(d.pagos || []).filter(p => +p.monto > 0).map(p => ({ forma:p.forma, monto:+p.monto, fecha:hoy })), cambio:Math.max(0, pagado - cobrar), vendedor:quien(), citaId:d.citaId || null };
+  put('ventas', id, v);
+  ls.forEach(l => {
+    if (l.productoId){ const e = ex(l.productoId); setEx(l.productoId, { disp:e.disp - (+l.cant || 0) }); logMov({ tipo:'venta', productoId:l.productoId, cant:+l.cant, ref:folio, motivo:'Venta' }); }
+    if (l.equipoId){
+      const q = clone(S.equipos[l.equipoId]); q.estado = 'vendido'; q.ventaId = id; q.vendido = hoy; put('equipos', l.equipoId, q);
+      if (v.clienteId) registrarDispositivo(v.clienteId, { marca:q.marca, modelo:q.modelo, modeloId:q.modeloId, imei:q.imei, color:q.color, origen:'Compra en tienda', ref:folio, garantiaHasta:l.garantiaHasta });
+    }
+  });
+  if (d.tomaId){ const c = clone(S.compras[d.tomaId]); c.aplicadaEn = folio; put('compras', d.tomaId, c); }
+  if (v.clienteId) bitacora(v.clienteId, { tipo:'Compra', nota:'Venta ' + folio + ' por ' + fmtMoney(total) + (credito ? ' (toma a cuenta ' + fmtMoney(credito) + ')' : '') });
+  return { id, v };
+}
+/* Regla 7: sin identificación, IMEI sin reporte y cuentas desvinculadas no se compra ni se toma a cuenta. */
+const VERIFICACIONES = [['identificacion','Identificación oficial del vendedor revisada'],['imei','IMEI consultado: sin reporte de robo o extravío'],['cuentas','Cuentas desvinculadas (iCloud / Google) y equipo restablecido'],['propiedad','Comprobante de propiedad o carta responsiva firmada']];
+function compraVerificada(c){ return VERIFICACIONES.every(([k]) => c.verificacion && c.verificacion[k]); }
+function aceptarCompra(id, d){
+  const c = clone(S.compras[id]); if (!c) return 'No se encontró la evaluación.';
+  if (!compraVerificada(c)) return 'Faltan verificaciones. Sin ellas no se compra ni se toma a cuenta.';
+  if (!(+d.precio > 0)) return 'Escribe el precio acordado.';
+  if (!c.equipo.imei) return 'Captura el IMEI del equipo.';
+  const eqId = uid('eq');
+  put('equipos', eqId, { marca:c.equipo.marca, modelo:c.equipo.modelo, modeloId:c.equipo.modeloId, capacidad:c.equipo.capacidad, color:c.equipo.color, condicion:'seminuevo', bateria:c.equipo.bateria || null, imei:c.equipo.imei, precio:null, estado:'reacondicionar', origen:c.tipo === 'toma' ? 'Toma a cuenta' : 'Compra a cliente', compraId:id, alta:hoyISO() });
+  put('costos', eqId, { costo:+d.precio });
+  c.estado = 'aceptada'; c.precio = +d.precio; c.equipoId = eqId; c.cerrada = hoyISO();
+  if (c.tipo === 'compra') c.pago = { fecha:hoyISO(), hora:ahoraHM(), forma:d.forma || 'efectivo', monto:+d.precio, por:quien() };
+  put('compras', id, c);
+  return null;
+}
+/* Caja del día: lo que entró por reparaciones y ventas, y lo que salió por compras de equipos. */
+function caja(fecha){
+  const out = [];
+  ents(S.ordenes).forEach(([id, o]) => (o.pagos || []).forEach(p => { if (p.fecha === fecha) out.push({ hora:p.hora || '', concepto:(p.concepto || 'Pago') + ' · ' + o.folio, forma:p.forma, monto:+p.monto, kind:'orden', id }); }));
+  ents(S.ventas).forEach(([id, v]) => (v.pagos || []).forEach(p => { if ((p.fecha || v.fecha) === fecha) out.push({ hora:v.hora || '', concepto:'Venta · ' + v.folio, forma:p.forma, monto:+p.monto - (p.forma === 'efectivo' ? +v.cambio || 0 : 0), kind:'venta', id }); }));
+  ents(S.compras).forEach(([id, c]) => { if (c.pago && c.pago.fecha === fecha) out.push({ hora:c.pago.hora || '', concepto:'Compra de equipo · ' + c.folio, forma:c.pago.forma, monto:-c.pago.monto, kind:'compra', id }); });
+  return out.sort((a, b) => a.hora.localeCompare(b.hora));
+}
+
+/* ---------- lo que se consulta desde afuera (sitio y portal) ----------
+   En Supabase pasan por funciones de la base que validan folio y celular;
+   en modo local se resuelven aquí con la misma forma de respuesta. */
+function vistaOrden(o){
+  const pres = ['presupuesto','autorizado','reparacion','espera','listo','entregado','rechazado'].includes(o.estado);
+  return { tipo:'orden', folio:o.folio, estado:o.estado, equipo:equipoTxt(o.equipo), problema:o.problema, creada:o.creada, promesa:o.promesa, modalidad:o.modalidad,
+    lineas:pres ? (o.lineas || []).map(l => ({ desc:l.desc, cant:+l.cant || 1, precio:l.precio })) : [], total:pres ? totalOrden(o) : null, pagado:pagadoOrden(o),
+    autorizacion:o.autorizacion || {}, garantiaHasta:o.entrega ? o.entrega.garantiaHasta : null, diagnostico:pres ? o.diagnostico || '' : '',
+    historial:(o.historial || []).filter(h => h.publico).map(h => ({ fecha:h.fecha, hora:h.hora, nota:h.nota })) };
+}
+function vistaCita(c){
+  const ord = c.ordenId && S.ordenes[c.ordenId];
+  return { tipo:'cita', folio:c.folio, estado:c.estado, fecha:c.fecha, hora:c.hora, turno:c.turno, lugar:c.lugar, motivo:c.motivo, modalidad:c.modalidad, cotizacion:c.cotizacion, nombre:(c.contacto.nombre || '').split(' ')[0], orden:ord ? ord.folio : null };
+}
+function telDe(x){ const cl = S.clientes[x.clienteId]; return digitos((cl && cl.tel) || (x.contacto && x.contacto.tel)); }
+function buscarFolio(folio, tel){
+  const f = String(folio || '').trim().toUpperCase(), t = digitos(tel);
+  const o = ents(S.ordenes).find(([, x]) => x.folio === f); if (o && telDe(o[1]) === t) return ['ordenes', o[0], o[1]];
+  const c = ents(S.citas).find(([, x]) => x.folio === f); if (c && telDe(c[1]) === t) return ['citas', c[0], c[1]];
+  return null;
+}
+async function consultar(folio, tel){
+  if (Store.sb) return rpc('ts_consulta', { folio:String(folio || '').trim().toUpperCase(), tel:digitos(tel) });
+  const r = buscarFolio(folio, tel); if (!r) return null;
+  return r[0] === 'ordenes' ? vistaOrden(r[2]) : vistaCita(r[2]);
+}
+async function autorizarFuera(folio, tel, decision, motivo, medio){
+  if (Store.sb) return rpc('ts_autorizar', { folio:String(folio).trim().toUpperCase(), tel:digitos(tel), decision, motivo:motivo || '', medio:medio || 'sitio' });
+  const r = buscarFolio(folio, tel); if (!r || r[0] !== 'ordenes') throw new Error('No encontramos ese folio con ese celular.');
+  if (r[2].estado !== 'presupuesto') throw new Error('Este presupuesto ya no está esperando autorización.');
+  ordenEdit(r[1], o => { autorizar(o, decision, medio || 'sitio', motivo, 'Cliente'); });
+  return vistaOrden(S.ordenes[r[1]]);
+}
+async function cancelarFuera(folio, tel, motivo){
+  if (Store.sb) return rpc('ts_cancelar_cita', { folio:String(folio).trim().toUpperCase(), tel:digitos(tel), motivo:motivo || 'cliente' });
+  const r = buscarFolio(folio, tel); if (!r || r[0] !== 'citas') throw new Error('No encontramos esa cita con ese celular.');
+  if (r[2].estado !== 'agendada') throw new Error('Esta cita ya no se puede cancelar en línea.');
+  citaEdit(r[1], c => { c.estado = 'cancelada'; c.cierre = { motivo:motivo || 'cliente', fecha:hoyISO() }; historialCita(c, 'Cancelada por el cliente'); });
+  return vistaCita(S.citas[r[1]]);
+}
+
+/* ---------- archivo .ics para que el cliente guarde su cita ---------- */
+function icsCita(c){
+  const E = empresa(), ini = c.fecha.replace(/-/g, '') + 'T' + c.hora.replace(':', '') + '00';
+  const fin = c.fecha.replace(/-/g, '') + 'T' + deMin(aMin(c.hora) + (+cfg().citas.intervalo || 30)).replace(':', '') + '00';
+  const txt = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//' + E.nombre + '//Citas//ES','BEGIN:VEVENT','UID:' + c.folio + '@tecno-spot','DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z',
+    'DTSTART:' + ini, 'DTEND:' + fin, 'SUMMARY:' + E.nombre + ' · turno ' + c.turno + ' (' + c.folio + ')', 'LOCATION:' + (c.lugar || E.lugar), 'DESCRIPTION:Muestra tu folio ' + c.folio + ' al llegar.', 'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(txt);
+}
+
+/* ---------- marca ---------- */
+function logo(tam){
+  return '<span class="logo ' + (tam || '') + '"><svg class="isotipo" viewBox="0 0 32 32" aria-hidden="true"><rect x="6.5" y="2.5" width="17" height="27" rx="4" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 25.5h6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="23" cy="9" r="6" fill="var(--spot)"/></svg><span class="wordmark">Tecno<span>-Spot</span></span></span>';
+}
+/* Íconos de línea para los problemas; heredan el color del texto. */
+const ICONOS = {
+  pantalla:'<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M9 7l3 3-2 3 4 3"/>',
+  bateria:'<rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10.5v3M6 10v4"/>',
+  carga:'<path d="M13 2.5 6 13.5h5l-1 8 7-11h-5z"/>',
+  bocina:'<path d="M4 9.5h4l5-4v13l-5-4H4z"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"/>',
+  microfono:'<rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5v4"/>',
+  camara:'<path d="M3 8h4l2-2.5h6L17 8h4v11H3z"/><circle cx="12" cy="13" r="3.5"/>',
+  tapa:'<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><rect x="8.5" y="5" width="4" height="5" rx="1.2"/><path d="M13 14l2.5 2.5-1.5 2"/>',
+  humedad:'<path d="M12 3c3.5 4.5 6 7.7 6 10.5a6 6 0 0 1-12 0C6 10.7 8.5 7.5 12 3z"/>',
+  botones:'<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M19.5 6v3M19.5 11v2M4.5 7v4"/>',
+  software:'<path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4.5h-4.5"/>',
+  liberacion:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 7.6-1.7"/>',
+  mantenimiento:'<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+  diagnostico:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/>',
+  tienda:'<path d="M4 8h16l-1.2 12H5.2z"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8"/>',
+  cambio:'<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
+  casa:'<path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/>',
+  escudo:'<path d="M12 3 5 6v5.5c0 4.5 3 8 7 9.5 4-1.5 7-5 7-9.5V6z"/><path d="M9 12l2 2 4-4"/>',
+  folio:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/>',
+  celular:'<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/>'
+};
+const icono = (k, cls) => '<svg class="ico ' + (cls || '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (ICONOS[k] || ICONOS.diagnostico) + '</svg>';
+
+/* ---------- herramientas, render y eventos ---------- */
+const APPS = {};
+const LINKS = window.TS_LINKS || {};
+function registrar(nombre, app){ APPS[nombre] = app; if (app.estado) Object.keys(app.estado).forEach(k => { if (!(k in U)) U[k] = clone(app.estado[k]); }); }
+const actual = () => APPS[U.app] || APPS[Object.keys(APPS)[0]];
+
+let queued = false;
+function scheduleRender(){ if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; render(); }); }
+function render(){
+  const app = actual(); if (!app) return;
+  const a = document.activeElement, fid = a && a.id;
+  let s0 = null, s1 = null; try { s0 = a.selectionStart; s1 = a.selectionEnd; } catch (e) {}
+  const db = document.querySelector('.drawer-body'); const dScroll = db ? db.scrollTop : 0;
+  let body;
+  if (SBCFG && !Store.sb && Store.mode !== 'cargando') body = app.barra() + '<main><div class="panel stack" role="alert"><h2>No se pudo conectar con la base de datos</h2><p class="muted">La página no pudo cargar la conexión con Supabase. Revisa tu internet y vuelve a cargar.</p></div></main>';
+  else if (Store.mode === 'supabase' && !accesoOk()) body = app.barra() + '<main>' + vAcceso() + '</main>';
+  else if (!Store.loaded.config) body = app.barra() + '<main><div class="loading">Cargando…</div></main>';
+  else body = app.vista();
+  $('#app').innerHTML = body + (U.toast ? '<div class="toast ' + (U.toast.k || '') + '" role="status">' + esc(U.toast.t) + '</div>' : '');
+  if (fid){ const el = document.getElementById(fid); if (el){ try { el.focus({ preventScroll:true }); if (s0 != null && el.setSelectionRange) el.setSelectionRange(s0, s1); } catch (e) {} } }
+  const db2 = document.querySelector('.drawer-body'); if (db2 && dScroll) db2.scrollTop = dScroll;
+  if (app.despues) app.despues();
+}
+let toastTimer = null;
+function toast(t, k){ U.toast = { t, k }; scheduleRender(); clearTimeout(toastTimer); toastTimer = setTimeout(() => { U.toast = null; scheduleRender(); }, 4600); }
+/* Hojas imprimibles (recepción, entrega, ticket): se arman aparte y se imprimen sin la interfaz. */
+function imprimir(html){
+  let el = document.getElementById('print'); if (!el){ el = document.createElement('div'); el.id = 'print'; document.body.appendChild(el); }
+  el.innerHTML = html; window.print();
+}
+
+function barra(herramienta, nav, derecha){
+  const modo = Store.mode === 'supabase' ? (Store.error ? '<span class="pill" title="' + esc(Store.error) + '">Sin conexión con la base</span>' : '<span class="pill live">En vivo</span>')
+    : Store.mode === 'local' ? '<span class="pill">Modo local · este navegador</span>' : '<span class="pill">Conectando…</span>';
+  const cuenta = Store.mode === 'supabase' && Auth.session ? '<button class="btn sm onbar" type="button" data-act="ts-salir" title="' + esc(Auth.session.user.email) + '">Salir</button>' : '';
+  return '<header class="top"><div class="top-in"><a class="brand" href="' + esc(LINKS.inicio || '#') + '" aria-label="' + esc(empresa().nombre) + ' · inicio">' + logo() + (herramienta ? '<span class="tool">' + esc(herramienta) + '</span>' : '') + '</a>'
+    + (nav ? '<nav class="topnav" aria-label="Secciones">' + nav + '</nav>' : '')
+    + '<div class="mode">' + (derecha || '') + cuenta + (Store.mode === 'supabase' ? '' : '<span class="pill solid">Datos de demostración</span>') + modo + '</div></div></header>';
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  if (TS_ACT[b.dataset.act]){ e.preventDefault(); TS_ACT[b.dataset.act](b.dataset, b); return; }
+  const app = actual(); const fn = app && app.acciones && app.acciones[b.dataset.act]; if (!fn) return;
+  e.preventDefault(); fn(b.dataset, b);
+});
+document.addEventListener('input', e => {
+  const t = e.target; if (!t.dataset || !t.dataset.bind || t.type === 'checkbox' || t.type === 'radio') return;
+  if (t.dataset.bind.indexOf('tsForm.') === 0){ Auth.form[t.dataset.bind.slice(7)] = t.value; return; }
+  setPath(U, t.dataset.bind, t.value);
+  if (t.dataset.live !== undefined) scheduleRender();
+});
+document.addEventListener('change', e => {
+  const t = e.target; if (!t.dataset) return;
+  if (t.dataset.bind){
+    setPath(U, t.dataset.bind, t.type === 'checkbox' ? t.checked : t.value);
+    if (t.tagName === 'SELECT' || t.type === 'radio' || t.type === 'checkbox' || t.dataset.live !== undefined) scheduleRender();
+  }
+  const app = actual(); if (app && app.cambio) app.cambio(t);
+});
+document.addEventListener('submit', e => {
+  const f = e.target; if (!f.dataset || !f.dataset.form) return;
+  e.preventDefault(); if (TS_FORM[f.dataset.form]) return TS_FORM[f.dataset.form](f);
+  const app = actual(); const fn = app && app.formularios && app.formularios[f.dataset.form]; if (fn) fn(f);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && U.drawer){ U.drawer = null; scheduleRender(); } });
+
+async function start(inicial){
+  const porHash = () => { const h = (location.hash || '').slice(1); return APPS[h] ? h : null; };
+  U.app = porHash() || inicial;
+  if (Object.keys(APPS).length > 1) window.addEventListener('hashchange', () => { const h = porHash(); if (h && h !== U.app){ U.app = h; U.drawer = null; if (APPS[h].alEntrar) APPS[h].alEntrar(); scheduleRender(); window.scrollTo(0, 0); } });
+  if (actual().alEntrar) actual().alEntrar();
+  render();
+  if (SBCFG){
+    if (window.supabase){ try { await iniciarSupabase(); await cargarOcupacion(); } catch (e) { Store.error = (e && e.message) || 'sin conexión'; COLS.forEach(c => { Store.loaded[c] = true; }); } }
+    else { Store.mode = 'supabase'; Store.error = 'No cargó la librería de Supabase'; }
+    scheduleRender(); return;
+  }
+  Store.mode = 'local'; loadLocal();
+  scheduleRender();
+}
+
+window.TS = {
+  S, U, Store, Auth, SEED, DAY, PC, DEMO_TAG, LINKS,
+  MARCAS, DONDE_MODELO, PROBLEMAS, PROB, GAMAS, MOTIVOS_CITA, ESTADOS_CITA, CIERRES_CITA, ESTADOS_ORDEN, RECHAZOS, MEDIOS, FORMAS_PAGO, ROLES, ROLES_CUENTA, CATEGORIAS,
+  CHECKLIST, CHECK_VALS, ACCESORIOS_REC, ESTADOS_EQUIPO, CONDICION_USADO, VERIFICACIONES,
+  $, esc, clone, vals, ents, pad, fmtMoney, fmtInt, pctTxt, hoyISO, sumarDias, difDias, fmtD, fmtDia, fmtDiaCorto, ahoraHM, aMin, digitos, telTxt, slug, uid, nuevoFolio,
+  setPath, getPath, chip, precioTxt, waLink, estadoDe, cfg, empresa, garantiaDias, quien, put, logMov, resetDemo,
+  modelosDe, marcasActivas, nombreModelo, tarifaId, tarifasDe, cotizar,
+  horasDelDia, horarios, diasAgenda, cargarOcupacion, agendar, crearCita, citaEdit, historialCita, nombreCita,
+  clientePorTel, crearCliente, bitacora, registrarDispositivo, nombreCliente,
+  verCostos, costo, montoLineas, sinPrecio, utilidad, bajoMargen, ex, setEx, prodNombre,
+  totalOrden, pagadoOrden, saldoOrden, ordenAbierta, equipoTxt, hist, crearOrden, ordenEdit, autorizar, apartarOrden, liberarOrden, descontarOrden, entregar, reclamoGarantia,
+  garantias, registrarVenta, compraVerificada, aceptarCompra, caja,
+  consultar, autorizarFuera, cancelarFuera, icsCita, logo, icono,
+  registrar, scheduleRender, toast, imprimir, barra, start, guardarPerfil, esInterno, rpc
+};
+})();
+
+</script>
+<script>
+/* Sitio público de Tecno-Spot.
+   Un asistente paso a paso: ¿qué le pasa a tu celular? → marca → modelo →
+   cotización → cita con turno en la cafetería. Lo que agenda el cliente llega
+   en vivo a los turnos de la consola. Nunca muestra costos. */
+(function(){
+'use strict';
+const T = window.TS, U = T.U, S = T.S, esc = T.esc, PC = T.PC, chip = T.chip, icono = T.icono;
+
+const FLUJOS = {
+  reparar:['problema','marca','modelo','cotizacion','cita','listo'],
+  vender:['marca','modelo','estado','cita','listo'],
+  cita:['motivo','cita','listo']
+};
+const ETQ = { problema:'Problema', marca:'Marca', modelo:'Modelo', cotizacion:'Cotización', estado:'Estado', motivo:'Motivo', cita:'Cita', listo:'Turno' };
+const VISTAS = [['inicio','Reparar'],['accesorios','Accesorios'],['celulares','Celulares'],['vender','Vende o cambia'],['domicilio','A domicilio'],['garantia','Garantía'],['consulta','Mi cita y mi equipo']];
+const CAPACIDADES = ['64 GB','128 GB','256 GB','512 GB','1 TB','No sé'];
+const W0 = { flujo:'reparar', paso:'problema', problema:'', marca:'', marcaTexto:'', modeloId:'', modeloTexto:'', sinModelo:false, busca:'', opcion:'',
+  motivo:'', condicion:'', capacidad:'', preferencia:'efectivo', productoId:'', equipoId:'', ordenFolio:'',
+  fecha:'', hora:'', modalidad:'cafeteria', direccion:'', nombre:'', tel:'', correo:'', tecmi:false, nota:'', privacidad:false, enviando:false, err:'', hecho:null };
+
+const E = () => T.empresa();
+/* "la cafetería de Tecmilenio": para escribir "en …" sin adivinar el artículo. */
+const enLugar = () => E().lugarFrase || E().lugar;
+const equipoElegido = () => { const w = U.w; return w.modeloId ? T.nombreModelo(w.modeloId) : ((w.marca === 'Otra' ? (w.marcaTexto || 'Otra marca') : w.marca) + ' ' + (w.modeloTexto || '')).trim(); };
+const ir = paso => { U.w.paso = paso; U.w.err = ''; U.wScroll = true; T.scheduleRender(); };
+const sel = on => on ? ' aria-pressed="true"' : ' aria-pressed="false"';
+
+/* ---------- barra y pie ---------- */
+function barra(){
+  const nav = VISTAS.map(([v, t]) => '<button type="button" data-act="sv" data-v="' + v + '"' + (U.sv === v ? ' aria-current="page"' : '') + '>' + t + '</button>').join('')
+    + (T.LINKS.portal ? '<a href="' + esc(T.LINKS.portal) + '">Mi cuenta</a>' : '');
+  return T.barra('', nav, '');
+}
+function pie(){
+  const e = E(), dato = (k, t) => '<dt>' + t + '</dt><dd>' + (e[k] ? esc(e[k]) : PC) + '</dd>';
+  return '<footer class="pie"><div class="pie-in"><div class="stack tight">' + T.logo() + '<p class="small muted">Reparación, accesorios, venta y compra de celulares de todas las gamas. Sucursal ' + esc(e.sucursal) + '.</p></div>'
+    + '<dl class="kv small">' + '<dt>Dónde</dt><dd>' + esc(e.lugar) + '</dd>' + dato('direccion', 'Dirección') + dato('horario', 'Horario') + dato('whatsapp', 'WhatsApp') + dato('telefono', 'Teléfono') + dato('correo', 'Correo') + '<dt>Privacidad</dt><dd>Aviso de privacidad ' + PC + '</dd></dl></div></footer>';
+}
+
+/* ---------- asistente ---------- */
+function stepper(){
+  const w = U.w, pasos = FLUJOS[w.flujo], i = pasos.indexOf(w.paso);
+  return '<ol class="stepper" aria-label="Pasos">' + pasos.map((p, k) => {
+    const cls = k < i ? 'hecho' : k === i ? 'actual' : '';
+    const inner = '<b>' + (k + 1) + '</b><span>' + ETQ[p] + '</span>';
+    return '<li class="' + cls + '"' + (k === i ? ' aria-current="step"' : '') + '>' + (k < i && w.paso !== 'listo' ? '<button type="button" data-act="w-ir" data-v="' + p + '">' + inner + '</button>' : '<div>' + inner + '</div>') + '</li>';
+  }).join('') + '</ol>';
+}
+function resumen(){
+  const w = U.w, partes = [];
+  const r = (i, t) => '<span class="r">' + icono(i) + esc(t) + '</span>';
+  if (w.flujo === 'reparar' && w.problema) partes.push(r(w.problema, T.PROB[w.problema].t));
+  if (w.flujo === 'cita' && w.motivo) partes.push(r('folio', T.MOTIVOS_CITA[w.motivo]));
+  if (w.marca && w.flujo !== 'cita') partes.push(r('celular', equipoElegido() || w.marca));
+  return partes.length && w.paso !== 'listo' ? '<div class="resumen">' + partes.join('') + '</div>' : '';
+}
+function pProblema(){
+  return '<div class="opciones prob">' + T.PROBLEMAS.map(p => '<button type="button" class="opcion' + (p.urgente ? ' urgente' : '') + '" data-act="w-problema" data-v="' + p.id + '"' + sel(U.w.problema === p.id) + '>' + icono(p.id) + '<b>' + esc(p.t) + '</b><span>' + esc(p.d) + '</span></button>').join('') + '</div>';
+}
+function pMarca(){
+  const ms = T.marcasActivas();
+  return '<div class="opciones marcas">' + ms.map(m => '<button type="button" class="opcion marca" data-act="w-marca" data-v="' + esc(m) + '"' + sel(U.w.marca === m) + '><b>' + esc(m) + '</b><span>' + T.modelosDe(m).length + ' modelos</span></button>').join('')
+    + '<button type="button" class="opcion marca" data-act="w-marca" data-v="Otra"' + sel(U.w.marca === 'Otra') + '><b>Otra marca</b><span>La escribes tú</span></button></div>';
+}
+function pModelo(){
+  const w = U.w, otra = w.marca === 'Otra';
+  const q = (w.busca || '').trim().toLowerCase();
+  const ms = otra ? [] : T.modelosDe(w.marca).filter(([, m]) => !q || m.modelo.toLowerCase().includes(q));
+  const donde = '<p class="tip">' + icono('diagnostico') + '<span><b>¿No sabes tu modelo?</b> ' + esc(w.marca === 'Apple' ? T.DONDE_MODELO.Apple : T.DONDE_MODELO.otra) + '</span></p>';
+  const manual = '<form class="stack tight manual" data-form="w-modelo-texto">' + (otra ? '<label class="f" for="w-marca-t">Marca<input id="w-marca-t" data-bind="w.marcaTexto" value="' + esc(w.marcaTexto) + '" placeholder="Por ejemplo: Nokia"></label>' : '')
+    + '<label class="f" for="w-mod-t">Escribe tu modelo<input id="w-mod-t" data-bind="w.modeloTexto" value="' + esc(w.modeloTexto) + '" placeholder="Como aparece en Ajustes"></label>'
+    + '<div><button class="btn primary" type="submit">Continuar</button></div></form>';
+  if (otra || w.sinModelo) return donde + manual + (otra ? '' : '<div><button class="btn quiet" type="button" data-act="w-sin-modelo">Volver a la lista</button></div>');
+  return '<div class="row"><label class="f buscar" for="w-busca">Busca tu modelo<input id="w-busca" type="search" data-bind="w.busca" data-live value="' + esc(w.busca) + '" placeholder="Por ejemplo: 13, A54, G84" autocomplete="off"></label></div>'
+    + '<div class="opciones modelos">' + (ms.map(([id, m]) => '<button type="button" class="opcion modelo" data-act="w-modelo" data-v="' + esc(id) + '"' + sel(w.modeloId === id) + '><b>' + esc(m.modelo) + '</b><span>' + esc(T.GAMAS[m.gama] || '') + '</span></button>').join('') || '<p class="muted">Ningún modelo coincide con tu búsqueda.</p>') + '</div>'
+    + donde + '<div><button class="btn" type="button" data-act="w-sin-modelo">No encuentro mi modelo</button></div>';
+}
+function pCotizacion(){
+  const w = U.w, p = T.PROB[w.problema], cot = T.cotizar(w.modeloId, w.problema);
+  const ops = cot.opciones;
+  if (ops.length && !ops.some(o => o.tarifaId === w.opcion)) w.opcion = ops[0].tarifaId;
+  const gar = d => d ? d + ' días de garantía' : 'Garantía ' + PC;
+  const lista = ops.length ? '<fieldset class="ops"><legend>Elige la opción que prefieres</legend>' + ops.map(o => '<label class="op"><input type="radio" name="w-op" value="' + esc(o.tarifaId) + '" data-bind="w.opcion"' + (w.opcion === o.tarifaId ? ' checked' : '') + '>'
+      + '<span class="op-t"><b>' + esc(o.calidad || p.t) + '</b><span class="small muted">' + (o.tiempo ? 'Tiempo estimado: ' + esc(o.tiempo) : 'Tiempo ' + PC) + ' · ' + (o.garantia ? gar(o.garantia) : gar(cot.garantia)) + '</span></span>'
+      + '<span class="op-p">' + T.precioTxt(o.precio) + (o.demo ? ' ' + T.DEMO_TAG : '') + '</span></label>').join('') + '</fieldset>'
+    : '<div class="callout spot"><strong>Precio por confirmar</strong>Todavía no publicamos el precio de esta reparación para ' + esc(equipoElegido()) + '. En tu cita revisamos el equipo frente a ti y te damos el precio exacto. No reparamos nada sin tu autorización.</div>';
+  return '<article class="cotiz"><div class="cotiz-h">' + icono(w.problema, 'grande') + '<div><div class="eyebrow">Tu cotización</div><h3>' + esc(p.t) + '</h3><p class="muted">' + esc(equipoElegido()) + '</p></div></div>'
+    + lista
+    + (w.problema === 'diagnostico' ? '<p><b>Revisión del equipo:</b> ' + T.precioTxt(cot.diagnostico) + '</p>' : '')
+    + (!ops.length ? '<p class="small">' + gar(cot.garantia) + '.</p>' : '')
+    + (p.tip ? '<p class="tip' + (p.urgente ? ' urgente' : '') + '">' + icono(p.urgente ? 'humedad' : 'mantenimiento') + '<span><b>' + (p.urgente ? 'Importante' : 'Consejo') + ':</b> ' + esc(p.tip) + '</span></p>' : '')
+    + '<div class="sigue"><h4>¿Qué sigue?</h4><ol><li>Agenda tu cita y recibe tu turno.</li><li>Ese día, en ' + esc(enLugar()) + ', revisamos tu celular contigo y confirmamos el precio.</li><li>Si estás de acuerdo, lo reparamos y te avisamos cuando esté listo.</li></ol></div>'
+    + '<div class="row"><button class="btn primary lg" type="button" data-act="w-ir" data-v="cita">Agendar mi cita</button><button class="btn quiet" type="button" data-act="w-ir" data-v="modelo">Cambiar el modelo</button></div></article>';
+}
+function pEstado(){
+  const w = U.w;
+  return '<div class="stack"><fieldset class="ops"><legend>¿Cómo está tu ' + esc(equipoElegido()) + '?</legend>' + T.ents(T.CONDICION_USADO).map(([k, v]) => '<label class="op"><input type="radio" name="w-cond" value="' + k + '" data-bind="w.condicion"' + (w.condicion === k ? ' checked' : '') + '><span class="op-t"><b>' + v + '</b><span class="small muted">' + ({ nuevo:'Sin rayones ni golpes, todo funciona.', bueno:'Rayones leves de uso, todo funciona.', detalles:'Golpes o rayones visibles, o algo no funciona bien.', danado:'Pantalla o tapa rota, o no enciende.' })[k] + '</span></span></label>').join('') + '</fieldset>'
+    + '<div class="grid2"><label class="f" for="w-cap">Capacidad<select id="w-cap" data-bind="w.capacidad"><option value="">Elige…</option>' + CAPACIDADES.map(c => '<option' + (w.capacidad === c ? ' selected' : '') + '>' + c + '</option>').join('') + '</select></label></div>'
+    + '<fieldset class="ops"><legend>¿Qué prefieres?</legend>'
+    + '<label class="op"><input type="radio" name="w-pref" value="efectivo" data-bind="w.preferencia"' + (w.preferencia === 'efectivo' ? ' checked' : '') + '><span class="op-t"><b>Venderlo</b><span class="small muted">Te pagamos por tu equipo.</span></span></label>'
+    + '<label class="op"><input type="radio" name="w-pref" value="toma" data-bind="w.preferencia"' + (w.preferencia === 'toma' ? ' checked' : '') + '><span class="op-t"><b>Cambiarlo (toma a cuenta)</b><span class="small muted">Lo tomamos como parte del pago de otro celular o accesorios.</span></span></label></fieldset>'
+    + requisitosVenta()
+    + '<div class="callout info"><strong>¿Cuánto me dan?</strong>Te hacemos una oferta en tu cita, después de revisar el equipo contigo.</div>'
+    + (w.err ? '<p class="err" role="alert">' + esc(w.err) + '</p>' : '')
+    + '<div><button class="btn primary lg" type="button" data-act="w-estado-ok">Agendar mi cita</button></div></div>';
+}
+function requisitosVenta(){
+  return '<div class="req"><h4>Lleva esto a tu cita</h4><ul><li>Tu identificación oficial.</li><li>Tu equipo sin reporte de robo o extravío (revisamos el IMEI).</li><li>Tu cuenta de iCloud o Google cerrada y el equipo sin contraseña de activación.</li><li>Caja, factura o comprobante, si los tienes.</li></ul></div>';
+}
+function pMotivo(){
+  const w = U.w, opts = ['entrega','duda','compra','garantia'];
+  return '<div class="stack"><div class="opciones motivos">' + opts.map(k => '<button type="button" class="opcion" data-act="w-motivo" data-v="' + k + '"' + sel(w.motivo === k) + '>' + icono({ entrega:'folio', duda:'diagnostico', compra:'tienda', garantia:'escudo' }[k]) + '<b>' + esc(T.MOTIVOS_CITA[k]) + '</b><span>' + ({ entrega:'Tu equipo ya está listo y pasas por él.', duda:'Una pregunta, una revisión rápida o una opinión.', compra:'Ver, probar o recoger un accesorio o un celular.', garantia:'Algo falló después de una reparación o compra.' })[k] + '</span></button>').join('') + '</div>'
+    + (w.productoId || w.equipoId ? '<p class="callout info"><strong>Apartado para tu cita</strong>' + esc(w.productoId ? T.prodNombre(w.productoId) : equipoVenta(S.equipos[w.equipoId])) + '</p>' : '') + '</div>';
+}
+function pCita(){
+  const w = U.w, c = T.cfg(), dias = T.diasAgenda();
+  if (!w.fecha || !dias.includes(w.fecha)) w.fecha = dias[0] || '';
+  const hs = w.fecha ? T.horarios(w.fecha) : [];
+  const dom = c.domicilio.activo;
+  return '<form class="stack" data-form="w-agendar" novalidate>'
+    + '<fieldset class="ops"><legend>¿Qué día pasas?</legend><div class="dias">' + (dias.map(d => { const libres = T.horarios(d).filter(h => !h.pasada).reduce((a, h) => a + h.libres, 0); return '<button type="button" class="dia" data-act="w-dia" data-v="' + d + '"' + sel(w.fecha === d) + (libres ? '' : ' disabled') + '><b>' + esc(T.fmtDiaCorto(d)) + '</b><span>' + (d === T.hoyISO() ? 'Hoy · ' : '') + (libres ? libres + ' lugares' : 'Lleno') + '</span></button>'; }).join('') || '<p class="muted">No hay días con citas disponibles.</p>') + '</div></fieldset>'
+    + (w.fecha ? '<fieldset class="ops"><legend>¿A qué hora? <span class="small muted">' + esc(T.fmtDia(w.fecha)) + '</span></legend><div class="horas">' + hs.map(h => '<button type="button" class="hora" data-act="w-hora" data-v="' + h.hora + '"' + sel(w.hora === h.hora) + (h.libres && !h.pasada ? '' : ' disabled') + '>' + h.hora + (h.pasada ? '' : h.libres ? '' : '<span>lleno</span>') + '</button>').join('') + '</div>'
+      + (c.citas.confirmado ? '' : '<p class="small muted">Horario de citas ' + PC + '.</p>') + '</fieldset>' : '')
+    + (w.flujo !== 'cita' || w.motivo === 'entrega' ? '<fieldset class="ops"><legend>¿Cómo lo prefieres?</legend>'
+      + '<label class="op"><input type="radio" name="w-mod" value="cafeteria" data-bind="w.modalidad"' + (w.modalidad !== 'domicilio' ? ' checked' : '') + '><span class="op-t"><b>Voy a ' + esc(enLugar()) + '</b><span class="small muted">Con tu turno te atendemos al llegar.</span></span></label>'
+      + (dom ? '<label class="op"><input type="radio" name="w-mod" value="domicilio" data-bind="w.modalidad"' + (w.modalidad === 'domicilio' ? ' checked' : '') + '><span class="op-t"><b>' + (w.motivo === 'entrega' ? 'Llévenmelo a domicilio' : 'Recójanlo en mi domicilio') + '</b><span class="small muted">Costo ' + (c.domicilio.costo != null ? T.fmtMoney(c.domicilio.costo) : PC) + ' · zona ' + (c.domicilio.zona ? esc(c.domicilio.zona) : PC) + '</span></span></label>' : '')
+      + '</fieldset>' : '')
+    + (w.modalidad === 'domicilio' ? '<label class="f" for="w-dir">Dirección completa<textarea id="w-dir" data-bind="w.direccion" placeholder="Calle, número, colonia y alguna referencia">' + esc(w.direccion) + '</textarea></label>' : '')
+    + '<fieldset class="ops"><legend>Tus datos</legend><div class="grid2">'
+    + '<label class="f" for="w-nom">Nombre<input id="w-nom" autocomplete="name" data-bind="w.nombre" value="' + esc(w.nombre) + '"></label>'
+    + '<label class="f" for="w-tel">Celular con WhatsApp<input id="w-tel" type="tel" inputmode="numeric" autocomplete="tel" data-bind="w.tel" value="' + esc(w.tel) + '" placeholder="10 dígitos"></label>'
+    + '<label class="f" for="w-mail">Correo (opcional)<input id="w-mail" type="email" autocomplete="email" data-bind="w.correo" value="' + esc(w.correo) + '"></label></div>'
+    + (w.motivo === 'entrega' ? '<label class="f" for="w-of">Folio de tu orden (si lo tienes)<input id="w-of" data-bind="w.ordenFolio" value="' + esc(w.ordenFolio) + '" placeholder="OS-…"></label>' : '')
+    + '<label class="f" for="w-nota">¿Algo más que debamos saber? (opcional)<textarea id="w-nota" data-bind="w.nota" placeholder="Por ejemplo: se cayó ayer y la pantalla quedó en negro">' + esc(w.nota) + '</textarea></label>'
+    + '<label class="check"><input type="checkbox" data-bind="w.tecmi"' + (w.tecmi ? ' checked' : '') + '><span>Soy de la comunidad Tecmilenio (alumno, maestro o colaborador)</span></label>'
+    + '<label class="check"><input type="checkbox" data-bind="w.privacidad"' + (w.privacidad ? ' checked' : '') + '><span>Acepto que usen mis datos solo para atender mi cita y mi equipo. Aviso de privacidad ' + PC + '</span></label></fieldset>'
+    + (w.err ? '<p class="err" role="alert">' + esc(w.err) + '</p>' : '')
+    + '<div><button class="btn primary lg" type="submit"' + (w.enviando ? ' disabled' : '') + '>' + (w.enviando ? 'Agendando…' : 'Confirmar mi cita') + '</button></div></form>';
+}
+function queLlevar(w){
+  const l = ['Tu celular y, si puedes, su cargador.'];
+  if (w.flujo === 'reparar') l.push('El código o patrón de desbloqueo para probarlo contigo (lo borramos al entregarlo).');
+  if (w.problema === 'liberacion' || w.flujo === 'vender') l.push('Tu identificación oficial.');
+  if (w.flujo === 'vender') l.push('Tu cuenta de iCloud o Google cerrada en el equipo.');
+  if (w.motivo === 'entrega') l.push('Tu folio de orden y una identificación.');
+  if (w.motivo === 'garantia') l.push('Tu folio de la reparación o de la compra.');
+  return l;
+}
+function pListo(){
+  const w = U.w, h = w.hecho; if (!h) return '';
+  const c = { folio:h.folio, fecha:h.fecha, hora:h.hora, turno:h.turno, lugar:h.lugar };
+  const share = 'Mi cita en ' + E().nombre + ': ' + T.fmtDia(h.fecha) + ' a las ' + h.hora + ', turno ' + h.turno + ', en ' + h.lugar + '. Folio ' + h.folio + '.';
+  const wa = E().whatsapp ? T.waLink(E().whatsapp, 'Hola, agendé mi cita. Folio ' + h.folio + ' · ' + T.fmtDia(h.fecha) + ' ' + h.hora + '.') : null;
+  return '<article class="ticket"><div class="ticket-turno"><span>Tu turno</span><b>' + esc(h.turno) + '</b></div>'
+    + '<div class="ticket-info"><h3>¡Listo, ' + esc((w.nombre || '').split(' ')[0]) + '!</h3><p class="grande">' + esc(T.fmtDia(h.fecha)) + ' · <b>' + esc(h.hora) + '</b></p><p>' + icono(w.modalidad === 'domicilio' ? 'casa' : 'tienda') + ' ' + esc(w.modalidad === 'domicilio' ? 'En tu domicilio' : h.lugar) + '</p>'
+    + '<p>Folio <span class="mono folio">' + esc(h.folio) + '</span></p></div></article>'
+    + '<div class="grid2"><div class="card"><h4>Ese día</h4><p>Al llegar, di tu folio o tu número de turno. Tu turno sirve para lo que necesites: dudas, entregar tu equipo para reparar o recogerlo.</p></div>'
+    + '<div class="card"><h4>Qué llevar</h4><ul class="lista">' + queLlevar(w).map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div></div>'
+    + '<div class="row"><a class="btn primary" href="' + T.icsCita(c) + '" download="cita-' + esc(h.folio) + '.ics">Guardar en mi calendario</a>'
+    + '<a class="btn" href="https://wa.me/?text=' + encodeURIComponent(share) + '" target="_blank" rel="noopener">Compartir por WhatsApp</a>'
+    + (wa ? '<a class="btn" href="' + esc(wa) + '" target="_blank" rel="noopener">Avisar a ' + esc(E().nombre) + '</a>' : '')
+    + '<button class="btn" type="button" data-act="ver-cita">Ver o cancelar mi cita</button><button class="btn quiet" type="button" data-act="w-nuevo">Agendar otra</button></div>';
+}
+const TITULOS = {
+  problema:['¿Qué le pasa a tu celular?','Elige lo que más se parezca. Si no estás seguro, elige “No sé qué tiene”.'],
+  marca:['¿De qué marca es?',''],
+  modelo:['¿Qué modelo es?',''],
+  cotizacion:['Esta es tu cotización',''],
+  estado:['Cuéntanos cómo está','Así preparamos tu oferta.'],
+  motivo:['¿Para qué es tu cita?',''],
+  cita:['Elige tu cita','Te damos un turno para ese día.'],
+  listo:['Tu cita quedó agendada','']
+};
+function asistente(nivel){
+  const w = U.w, t = TITULOS[w.paso], h = nivel || 'h2';
+  const cuerpo = { problema:pProblema, marca:pMarca, modelo:pModelo, cotizacion:pCotizacion, estado:pEstado, motivo:pMotivo, cita:pCita, listo:pListo }[w.paso]();
+  const titulo = w.paso === 'modelo' ? '¿Qué modelo es tu ' + (w.marca === 'Otra' ? 'celular' : w.marca) + '?' : t[0];
+  return '<section class="asistente" id="asistente" aria-labelledby="w-titulo">' + stepper() + resumen()
+    + '<div class="paso-h"><' + h + ' id="w-titulo">' + esc(titulo) + '</' + h + '>' + (t[1] ? '<p class="muted">' + esc(t[1]) + '</p>' : '') + '</div>'
+    + cuerpo
+    + (w.paso !== 'listo' && w.paso !== FLUJOS[w.flujo][0] ? '<div class="volver"><button class="btn quiet" type="button" data-act="w-atras">← Paso anterior</button></div>' : '')
+    + '</section>';
+}
+
+/* ---------- secciones ---------- */
+function comoFunciona(){
+  const pasos = [['diagnostico','Cotiza','Elige el problema, tu marca y tu modelo.'],['folio','Agenda','Escoge día y hora; recibes folio y turno.'],['tienda','Llega con tu turno','En ' + enLugar() + ' revisamos tu equipo contigo.'],['escudo','Recíbelo con garantía','Te avisamos por WhatsApp cuando esté listo.']];
+  return '<section class="seccion"><h2>Así de fácil</h2><ol class="como">' + pasos.map(([i, t, d], k) => '<li>' + icono(i) + '<b>' + (k + 1) + '. ' + t + '</b><span>' + esc(d) + '</span></li>').join('') + '</ol></section>';
+}
+function tambien(){
+  const items = [['accesorios','tienda','Accesorios','Fundas, micas de vidrio, de privacidad e hidrogel, cargadores, baterías portátiles, AirPods y Apple Watch.'],
+    ['celulares','celular','Celulares','Nuevos y seminuevos de todas las gamas, con garantía.'],
+    ['vender','cambio','Vende o cambia tu celular','Te lo compramos o lo tomamos a cuenta de otro.'],
+    ['domicilio','casa','A domicilio','Recolección y entrega en tu domicilio.'],
+    ['garantia','escudo','Garantía','Toda reparación y todo equipo se entregan con garantía por escrito.'],
+    ['consulta','folio','Mi cita y mi equipo','Con tu folio y tu celular ves el estado y autorizas tu presupuesto.']];
+  return '<section class="seccion"><h2>También en ' + esc(E().nombre) + '</h2><div class="servicios">' + items.map(([v, i, t, d]) => '<button type="button" class="servicio" data-act="sv" data-v="' + v + '">' + icono(i) + '<b>' + esc(t) + '</b><span>' + esc(d) + '</span></button>').join('') + '</div></section>';
+}
+function vInicio(){
+  const w = U.w, inicio = w.paso === FLUJOS[w.flujo][0] && w.flujo === 'reparar';
+  return '<div class="hero' + (inicio ? '' : ' corto') + '"><div class="hero-in"><div class="eyebrow">Reparación de celulares en ' + esc(enLugar()) + '</div>'
+    + (inicio ? '<p class="lede">Elige el problema, tu marca y tu modelo. Te damos tu cotización y tu cita con turno: ese día resolvemos tus dudas, recibimos tu equipo o te lo entregamos.</p>' : '') + '</div></div>'
+    + '<main class="sitio">' + asistente('h1') + (inicio ? comoFunciona() + tambien() : '') + '</main>';
+}
+function disponibilidad(pid){ const e = T.ex(pid); return e.disp > 3 ? chip('ok','Disponible') : e.disp > 0 ? chip('warn','Últimas ' + e.disp) : chip('muted','Agotado'); }
+function vAccesorios(){
+  const cats = T.ents(T.CATEGORIAS).filter(([k]) => k !== 'refacciones');
+  const ps = T.ents(S.productos).filter(([, p]) => p.tipo === 'accesorio' && !p.oculto && (!U.cat || p.categoria === U.cat)).sort((a, b) => a[1].nombre.localeCompare(b[1].nombre, 'es'));
+  return '<main class="sitio"><section class="seccion"><div class="eyebrow">Accesorios</div><h1>Protege y carga tu celular</h1><p class="muted">Apártalo aquí y recógelo en tu turno de la cafetería.</p>'
+    + '<div class="filtros"><button type="button" class="filtro" data-act="cat" data-v=""' + sel(!U.cat) + '>Todo</button>' + cats.map(([k, v]) => '<button type="button" class="filtro" data-act="cat" data-v="' + k + '"' + sel(U.cat === k) + '>' + esc(v) + '</button>').join('') + '</div>'
+    + (ps.length ? '<div class="productos">' + ps.map(([id, p]) => '<article class="producto"><div class="row"><span class="small muted">' + esc(T.CATEGORIAS[p.categoria] || '') + '</span><span class="spacer"></span>' + disponibilidad(id) + '</div><h3>' + esc(p.nombre) + '</h3>' + (p.compat ? '<p class="small muted">Para ' + esc(p.compat) + '</p>' : '')
+        + '<p class="precio">' + T.precioTxt(p.precio) + (p.demo ? ' ' + T.DEMO_TAG : '') + '</p><button class="btn sm" type="button" data-act="apartar" data-p="' + esc(id) + '"' + (T.ex(id).disp ? '' : ' disabled') + '>Apartar y recoger en mi turno</button></article>').join('') + '</div>'
+      : '<div class="card"><h3>Estamos cargando el catálogo</h3><p class="muted">Muy pronto verás aquí precios y existencias. Mientras, agenda un turno y te mostramos lo que hay.</p><div><button class="btn primary" type="button" data-act="flujo-cita" data-v="compra">Agendar un turno</button></div></div>')
+    + '</section></main>';
+}
+function equipoVenta(q){ return q ? (q.marca + ' ' + q.modelo + (q.capacidad ? ' · ' + q.capacidad : '')) : 'Celular'; }
+function vCelulares(){
+  const f = U.celCond || '';
+  const qs = T.ents(S.equipos).filter(([, q]) => q.estado === 'disponible' && (!f || q.condicion === f)).sort((a, b) => (+a[1].precio || 0) - (+b[1].precio || 0));
+  const g = T.cfg().garantiaEquipo;
+  return '<main class="sitio"><section class="seccion"><div class="eyebrow">Celulares</div><h1>Nuevos y seminuevos de todas las gamas</h1><p class="muted">Todos se revisan antes de venderse y se entregan con garantía. ¿Tienes un celular que ya no usas? Te lo tomamos a cuenta.</p>'
+    + '<div class="filtros"><button type="button" class="filtro" data-act="cel" data-v=""' + sel(!f) + '>Todos</button><button type="button" class="filtro" data-act="cel" data-v="nuevo"' + sel(f === 'nuevo') + '>Nuevos</button><button type="button" class="filtro" data-act="cel" data-v="seminuevo"' + sel(f === 'seminuevo') + '>Seminuevos</button></div>'
+    + (qs.length ? '<div class="productos">' + qs.map(([id, q]) => { const m = S.modelos[q.modeloId]; const gd = g[q.condicion === 'nuevo' ? 'nuevo' : 'seminuevo'];
+        return '<article class="producto">' + '<div class="row">' + chip(q.condicion === 'nuevo' ? 'info' : 'ok', q.condicion === 'nuevo' ? 'Nuevo' : 'Seminuevo') + (m ? '<span class="small muted">' + esc(T.GAMAS[m.gama] || '') + '</span>' : '') + '</div><h3>' + esc(q.marca + ' ' + q.modelo) + '</h3>'
+          + '<p class="small muted">' + [q.capacidad, q.color, q.bateria ? 'batería al ' + q.bateria + '%' : ''].filter(Boolean).map(esc).join(' · ') + '</p>'
+          + '<p class="precio">' + T.precioTxt(q.precio) + (q.demo ? ' ' + T.DEMO_TAG : '') + '</p><p class="small">' + (gd ? gd + ' días de garantía' : 'Garantía ' + PC) + '</p>'
+          + '<button class="btn sm" type="button" data-act="apartar" data-e="' + esc(id) + '">Apartar y verlo en mi turno</button></article>'; }).join('') + '</div>'
+      : '<div class="card"><h3>Pronto publicamos los equipos disponibles</h3><p class="muted">Agenda un turno y te mostramos lo que tenemos.</p><div><button class="btn primary" type="button" data-act="flujo-cita" data-v="compra">Agendar un turno</button></div></div>')
+    + '</section></main>';
+}
+function vVender(){
+  const w = U.w, enFlujo = w.flujo === 'vender';
+  return '<main class="sitio"><section class="seccion"><div class="eyebrow">Vende o cambia tu celular</div><h1>Tu celular de antes vale</h1><p class="muted">Te lo compramos o lo tomamos a cuenta de un celular o accesorios. Por seguridad, solo recibimos equipos propios y sin reporte.</p></section>'
+    + (enFlujo ? asistente() : '<div class="grid2"><div class="card">' + requisitosVenta() + '</div><div class="card"><h3>¿Cómo funciona?</h3><ol class="lista"><li>Elige tu marca y tu modelo.</li><li>Cuéntanos cómo está.</li><li>Agenda tu cita: revisamos el equipo contigo y te hacemos una oferta.</li></ol><div><button class="btn primary lg" type="button" data-act="flujo-vender">Empezar</button></div></div></div>')
+    + '</main>';
+}
+function vDomicilio(){
+  const c = T.cfg().domicilio;
+  return '<main class="sitio"><section class="seccion"><div class="eyebrow">A domicilio</div><h1>Recolección y entrega a domicilio</h1><p class="muted">Si no puedes venir, pasamos por tu celular y te lo regresamos reparado.</p>'
+    + '<dl class="kv"><dt>Disponible</dt><dd>' + (c.activo ? 'Sí' : PC) + '</dd><dt>Costo</dt><dd>' + (c.costo != null ? T.fmtMoney(c.costo) : PC) + '</dd><dt>Zona</dt><dd>' + (c.zona ? esc(c.zona) : PC) + '</dd></dl>'
+    + '<div class="row"><button class="btn primary lg" type="button" data-act="flujo-domicilio">Cotizar y pedir recolección</button></div>'
+    + '<p class="small muted">Primero cotizas como siempre; en el paso de la cita eliges “Recójanlo en mi domicilio”.</p></section></main>';
+}
+function vGarantia(){
+  const c = T.cfg();
+  return '<main class="sitio"><section class="seccion"><div class="eyebrow">Garantía</div><h1>Toda reparación se entrega con garantía</h1><p class="muted">Al entregarte tu equipo te damos un comprobante con la fecha hasta la que cubre la garantía. Con tu folio la consultas cuando quieras.</p>'
+    + '<div class="tbl"><table class="t"><thead><tr><th>Servicio</th><th class="num">Garantía</th></tr></thead><tbody>' + T.PROBLEMAS.filter(p => p.id !== 'diagnostico').map(p => '<tr><td>' + esc(p.t) + '</td><td class="num">' + (c.garantias[p.id] ? c.garantias[p.id] + ' días' : PC) + '</td></tr>').join('')
+    + '<tr><td>Celulares nuevos</td><td class="num">' + (c.garantiaEquipo.nuevo ? c.garantiaEquipo.nuevo + ' días' : PC) + '</td></tr><tr><td>Celulares seminuevos</td><td class="num">' + (c.garantiaEquipo.seminuevo ? c.garantiaEquipo.seminuevo + ' días' : PC) + '</td></tr></tbody></table></div>'
+    + '<div class="grid2"><div class="card"><h3>Qué cubre</h3><p>' + (c.terminos.garantia ? esc(c.terminos.garantia) : 'Las condiciones de la garantía están ' + PC + '.') + '</p></div>'
+    + '<div class="card"><h3>¿Algo falló?</h3><p>Agenda un turno con el motivo “Garantía” y trae tu folio.</p><div class="row"><button class="btn primary" type="button" data-act="flujo-cita" data-v="garantia">Agendar por garantía</button><button class="btn" type="button" data-act="sv" data-v="consulta">Consultar mi garantía</button></div></div></div></section></main>';
+}
+
+/* ---------- consulta por folio y celular ---------- */
+const PASOS_ORDEN = [['recibido','Recibimos tu equipo'],['diagnostico','Lo estamos revisando'],['presupuesto','Te enviamos el presupuesto'],['autorizado','Autorizaste la reparación'],['reparacion','Lo estamos reparando'],['listo','Listo para entregar'],['entregado','Entregado']];
+function lineaTiempo(r){
+  const orden = PASOS_ORDEN.map(p => p[0]);
+  const actual = r.estado === 'espera' ? 'reparacion' : r.estado === 'rechazado' ? 'presupuesto' : r.estado;
+  const i = orden.indexOf(actual);
+  return '<ol class="timeline">' + PASOS_ORDEN.map(([k, t], j) => '<li class="' + (j < i ? 'on' : j === i ? 'now' : '') + '"><div><b>' + esc(k === 'reparacion' && r.estado === 'espera' ? 'Esperando una refacción' : k === 'presupuesto' && r.estado === 'rechazado' ? 'No autorizaste la reparación' : t) + '</b>' + (j === i && r.promesa && r.estado !== 'entregado' ? '<span>Fecha estimada: ' + esc(T.fmtD(r.promesa)) + '</span>' : '') + '</div></li>').join('') + '</ol>';
+}
+function vResultado(){
+  const q = U.q, r = q.res; if (!r) return '';
+  if (r.tipo === 'cita'){
+    const e = T.estadoDe(T.ESTADOS_CITA, r.estado);
+    return '<article class="card"><div class="row"><h3>Cita <span class="mono">' + esc(r.folio) + '</span></h3><span class="spacer"></span>' + chip(e[2], e[1]) + '</div>'
+      + '<dl class="kv"><dt>Turno</dt><dd><b>' + esc(r.turno) + '</b></dd><dt>Cuándo</dt><dd>' + esc(T.fmtDia(r.fecha)) + ' · ' + esc(r.hora) + '</dd><dt>Dónde</dt><dd>' + esc(r.modalidad === 'domicilio' ? 'En tu domicilio' : r.lugar) + '</dd><dt>Motivo</dt><dd>' + esc(T.MOTIVOS_CITA[r.motivo] || r.motivo) + '</dd>'
+      + (r.cotizacion && r.cotizacion.problema ? '<dt>Cotización</dt><dd>' + esc(T.PROB[r.cotizacion.problema] ? T.PROB[r.cotizacion.problema].t : '') + ' · ' + esc(r.cotizacion.equipo || '') + '</dd>' : '') + '</dl>'
+      + (r.orden ? '<p class="callout info"><strong>Tu equipo quedó registrado</strong>Su orden es <span class="mono">' + esc(r.orden) + '</span>. <button class="linkbtn" type="button" data-act="q-orden" data-v="' + esc(r.orden) + '">Ver cómo va</button></p>' : '')
+      + (r.estado === 'agendada' ? (q.cancelando ? '<div class="stack tight"><label class="f" for="q-mot">¿Por qué cancelas?<select id="q-mot" data-bind="q.motivo"><option value="cliente">Ya no la necesito</option><option value="reprogramo">Voy a agendar otro día</option><option value="otro">Otro motivo</option></select></label><div class="row"><button class="btn danger" type="button" data-act="q-cancelar-ok">Cancelar mi cita</button><button class="btn quiet" type="button" data-act="q-cancelar">No, conservarla</button></div></div>' : '<div><button class="btn" type="button" data-act="q-cancelar">Cancelar esta cita</button></div>') : '')
+      + '</article>';
+  }
+  const e = T.estadoDe(T.ESTADOS_ORDEN, r.estado);
+  const saldo = r.total != null ? Math.max(0, r.total - (r.pagado || 0)) : null;
+  return '<article class="card"><div class="row"><h3>Orden <span class="mono">' + esc(r.folio) + '</span></h3><span class="spacer"></span>' + chip(e[2], e[1]) + '</div>'
+    + '<p class="muted">' + esc(r.equipo) + ' · ' + esc(T.PROB[r.problema] ? T.PROB[r.problema].t : '') + '</p>'
+    + '<div class="grid2"><div>' + lineaTiempo(r) + '</div><div class="stack tight">'
+    + (r.diagnostico ? '<div><h4>Diagnóstico</h4><p>' + esc(r.diagnostico) + '</p></div>' : '')
+    + (r.lineas.length ? '<div class="tbl"><table class="t"><thead><tr><th>Concepto</th><th class="num">Importe</th></tr></thead><tbody>' + r.lineas.map(l => '<tr><td>' + esc(l.desc) + (l.cant > 1 ? ' × ' + l.cant : '') + '</td><td class="num">' + T.precioTxt(l.precio == null ? null : l.precio * l.cant) + '</td></tr>').join('') + '</tbody><tfoot><tr><td>Total</td><td class="num">' + T.fmtMoney(r.total) + '</td></tr>' + (r.pagado ? '<tr><td>Pagado</td><td class="num">' + T.fmtMoney(r.pagado) + '</td></tr><tr><td>Saldo</td><td class="num">' + T.fmtMoney(saldo) + '</td></tr>' : '') + '</tfoot></table></div>' : '')
+    + (r.estado === 'presupuesto' ? (q.rechazando
+        ? '<div class="stack tight"><label class="f" for="q-rech">¿Por qué no lo autorizas?<select id="q-rech" data-bind="q.motivo">' + T.ents(T.RECHAZOS).map(([k, v]) => '<option value="' + k + '"' + (q.motivo === k ? ' selected' : '') + '>' + v + '</option>').join('') + '</select></label><div class="row"><button class="btn danger" type="button" data-act="q-autorizar" data-v="no">No autorizo</button><button class="btn quiet" type="button" data-act="q-rechazar">Volver</button></div></div>'
+        : '<div class="callout spot"><strong>Necesitamos tu autorización</strong>No reparamos nada sin tu visto bueno.</div><div class="row"><button class="btn primary" type="button" data-act="q-autorizar" data-v="si">Autorizo la reparación</button><button class="btn" type="button" data-act="q-rechazar">No autorizo</button></div>') : '')
+    + (r.garantiaHasta ? '<p class="callout info"><strong>Garantía</strong>Vigente hasta el ' + esc(T.fmtD(r.garantiaHasta)) + '.</p>' : '')
+    + '</div></div>'
+    + (r.historial.length ? '<details><summary>Historial</summary><ul class="log">' + r.historial.slice().reverse().map(h => '<li><span class="h">' + esc(T.fmtD(h.fecha)) + (h.hora ? ' · ' + esc(h.hora) : '') + '</span>' + esc(h.nota) + '</li>').join('') + '</ul></details>' : '')
+    + '</article>';
+}
+function vConsulta(){
+  const q = U.q;
+  return '<main class="sitio"><section class="seccion consulta"><div class="eyebrow">Mi cita y mi equipo</div><h1>Consulta tu cita o tu reparación</h1><p class="muted">Escribe el folio que te dimos (empieza con CT si es una cita u OS si es una orden) y tu celular.</p>'
+    + '<form class="panel consulta-f" data-form="consultar"><label class="f" for="q-folio">Folio<input id="q-folio" data-bind="q.folio" value="' + esc(q.folio) + '" placeholder="CT-… u OS-…" autocapitalize="characters" autocomplete="off"></label>'
+    + '<label class="f" for="q-tel">Celular<input id="q-tel" type="tel" inputmode="numeric" data-bind="q.tel" value="' + esc(q.tel) + '" placeholder="10 dígitos"></label>'
+    + '<button class="btn primary" type="submit"' + (q.buscando ? ' disabled' : '') + '>' + (q.buscando ? 'Buscando…' : 'Consultar') + '</button></form>'
+    + (q.err ? '<p class="err" role="alert">' + esc(q.err) + '</p>' : '') + vResultado() + '</section></main>';
+}
+
+function vista(){
+  const v = { inicio:vInicio, accesorios:vAccesorios, celulares:vCelulares, vender:vVender, domicilio:vDomicilio, garantia:vGarantia, consulta:vConsulta }[U.sv] || vInicio;
+  return barra() + v() + pie();
+}
+function despues(){
+  if (U.wScroll){ U.wScroll = false; const el = document.getElementById('asistente'); if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView({ block:'start' }); }
+}
+function nuevoAsistente(flujo, extra){ U.w = Object.assign(T.clone(W0), { flujo, paso:FLUJOS[flujo][0] }, extra || {}); }
+async function buscar(){
+  const q = U.q;
+  if (!q.folio.trim() || T.digitos(q.tel).length !== 10){ q.err = 'Escribe tu folio y tu celular de 10 dígitos.'; return T.scheduleRender(); }
+  q.buscando = true; q.err = ''; q.res = null; T.scheduleRender();
+  try { q.res = await T.consultar(q.folio, q.tel); if (!q.res) q.err = 'No encontramos ese folio con ese celular. Revisa que estén bien escritos.'; }
+  catch (e) { q.err = 'No se pudo consultar: ' + e.message; }
+  q.buscando = false; q.rechazando = false; q.cancelando = false; T.scheduleRender();
+}
+
+T.registrar('sitio', {
+  barra, vista, despues, acceso:'publico',
+  estado:{ sv:'inicio', w:T.clone(W0), q:{ folio:'', tel:'', res:null, err:'', buscando:false, motivo:'precio', rechazando:false, cancelando:false }, cat:'', celCond:'', wScroll:false },
+  alEntrar(){
+    const p = new URLSearchParams(location.search);
+    if (p.get('folio')){ U.sv = 'consulta'; U.q.folio = p.get('folio').toUpperCase(); }
+  },
+  acciones:{
+    sv(d){ U.sv = d.v; if (d.v === 'inicio' && U.w.flujo !== 'reparar') nuevoAsistente('reparar'); T.scheduleRender(); window.scrollTo(0, 0); },
+    cat(d){ U.cat = d.v; T.scheduleRender(); },
+    cel(d){ U.celCond = d.v; T.scheduleRender(); },
+    'w-ir'(d){ ir(d.v); },
+    'w-atras'(){ const p = FLUJOS[U.w.flujo], i = p.indexOf(U.w.paso); if (i > 0) ir(p[i - 1]); },
+    'w-problema'(d){ U.w.problema = d.v; ir('marca'); },
+    'w-marca'(d){ const w = U.w; if (w.marca !== d.v){ w.modeloId = ''; w.modeloTexto = ''; w.busca = ''; } w.marca = d.v; w.sinModelo = d.v === 'Otra'; ir('modelo'); },
+    'w-modelo'(d){ const w = U.w; w.modeloId = d.v; w.modeloTexto = ''; w.opcion = ''; ir(w.flujo === 'vender' ? 'estado' : 'cotizacion'); },
+    'w-sin-modelo'(){ U.w.sinModelo = !U.w.sinModelo; U.w.modeloId = ''; T.scheduleRender(); },
+    'w-motivo'(d){ U.w.motivo = d.v; ir('cita'); },
+    'w-dia'(d){ U.w.fecha = d.v; U.w.hora = ''; T.scheduleRender(); },
+    'w-hora'(d){ U.w.hora = d.v; U.w.err = ''; T.scheduleRender(); },
+    'w-estado-ok'(){ const w = U.w; if (!w.condicion){ w.err = 'Elige cómo está tu equipo.'; return T.scheduleRender(); } ir('cita'); },
+    'w-nuevo'(){ nuevoAsistente('reparar'); U.sv = 'inicio'; T.scheduleRender(); window.scrollTo(0, 0); },
+    'flujo-vender'(){ nuevoAsistente('vender'); U.sv = 'vender'; T.scheduleRender(); },
+    'flujo-cita'(d){ nuevoAsistente('cita', { motivo:d.v, paso:'cita' }); U.sv = 'inicio'; T.scheduleRender(); window.scrollTo(0, 0); },
+    'flujo-domicilio'(){ nuevoAsistente('reparar', { modalidad:'domicilio' }); U.sv = 'inicio'; T.scheduleRender(); window.scrollTo(0, 0); },
+    apartar(d){ nuevoAsistente('cita', { motivo:'compra', paso:'cita', productoId:d.p || '', equipoId:d.e || '' }); U.sv = 'inicio'; T.scheduleRender(); window.scrollTo(0, 0); },
+    'ver-cita'(){ const h = U.w.hecho; U.q.folio = h.folio; U.q.tel = U.w.tel; U.sv = 'consulta'; buscar(); window.scrollTo(0, 0); },
+    'q-orden'(d){ U.q.folio = d.v; buscar(); },
+    'q-rechazar'(){ U.q.rechazando = !U.q.rechazando; T.scheduleRender(); },
+    'q-cancelar'(){ U.q.cancelando = !U.q.cancelando; U.q.motivo = 'cliente'; T.scheduleRender(); },
+    async 'q-autorizar'(d){
+      const q = U.q;
+      try { q.res = await T.autorizarFuera(q.folio, q.tel, d.v, d.v === 'no' ? q.motivo : '', 'sitio'); q.rechazando = false; T.toast(d.v === 'si' ? 'Gracias. Autorizaste la reparación; te avisamos cuando esté lista.' : 'Listo. Registramos que no autorizas; tu equipo se devuelve sin reparar.'); }
+      catch (e) { T.toast(e.message, 'crit'); }
+      T.scheduleRender();
+    },
+    async 'q-cancelar-ok'(){
+      const q = U.q;
+      try { q.res = await T.cancelarFuera(q.folio, q.tel, q.motivo); q.cancelando = false; T.toast('Cancelamos tu cita.'); await T.cargarOcupacion(); }
+      catch (e) { T.toast(e.message, 'crit'); }
+      T.scheduleRender();
+    }
+  },
+  formularios:{
+    consultar:buscar,
+    'w-modelo-texto'(){
+      const w = U.w;
+      if (w.marca === 'Otra' && !w.marcaTexto.trim()){ T.toast('Escribe la marca de tu celular.', 'warn'); return; }
+      if (!w.modeloTexto.trim()){ T.toast('Escribe el modelo de tu celular.', 'warn'); return; }
+      w.modeloId = ''; ir(w.flujo === 'vender' ? 'estado' : 'cotizacion');
+    },
+    async 'w-agendar'(){
+      const w = U.w;
+      if (!w.fecha || !w.hora){ w.err = 'Elige el día y la hora de tu cita.'; return T.scheduleRender(); }
+      if (w.nombre.trim().length < 2){ w.err = 'Escribe tu nombre.'; return T.scheduleRender(); }
+      if (T.digitos(w.tel).length !== 10){ w.err = 'Escribe tu celular a 10 dígitos para avisarte por WhatsApp.'; return T.scheduleRender(); }
+      if (w.modalidad === 'domicilio' && w.direccion.trim().length < 8){ w.err = 'Escribe tu dirección completa para la recolección.'; return T.scheduleRender(); }
+      if (!w.privacidad){ w.err = 'Necesitamos tu permiso para usar tus datos en tu cita.'; return T.scheduleRender(); }
+      const motivo = w.flujo === 'reparar' ? 'reparacion' : w.flujo === 'vender' ? 'venta' : w.motivo;
+      const cot = w.flujo === 'cita' ? (w.productoId || w.equipoId ? { tipo:'compra', productoId:w.productoId || null, equipoId:w.equipoId || null, equipo:w.productoId ? T.prodNombre(w.productoId) : equipoVenta(S.equipos[w.equipoId]) } : w.ordenFolio ? { tipo:'entrega', ordenFolio:w.ordenFolio.trim().toUpperCase() } : null)
+        : { tipo:w.flujo === 'vender' ? 'venta' : 'reparacion', problema:w.problema || null, modeloId:w.modeloId || null, marca:w.marca === 'Otra' ? w.marcaTexto.trim() : w.marca, modeloTexto:w.modeloTexto.trim(), equipo:equipoElegido(),
+            tarifaId:w.opcion || null, precio:w.opcion && S.tarifas[w.opcion] ? S.tarifas[w.opcion].precio : null, condicion:w.condicion || null, capacidad:w.capacidad || null, preferencia:w.flujo === 'vender' ? w.preferencia : null };
+      w.enviando = true; w.err = ''; T.scheduleRender();
+      try {
+        w.hecho = await T.agendar({ fecha:w.fecha, hora:w.hora, motivo, modalidad:w.modalidad, direccion:w.modalidad === 'domicilio' ? w.direccion.trim() : '', nota:w.nota.trim(), origen:'sitio', cotizacion:cot, contacto:{ nombre:w.nombre.trim(), tel:w.tel, correo:w.correo.trim(), tecmi:w.tecmi } });
+        w.paso = 'listo'; U.wScroll = true;
+        T.cargarOcupacion();
+      } catch (e) { w.err = e.message; }
+      w.enviando = false; T.scheduleRender();
+    }
+  }
+});
+})();
+
+</script>
+<script>
+window.TS.start("sitio");
+</script>
+</body>
+</html>
