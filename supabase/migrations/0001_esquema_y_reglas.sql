@@ -395,6 +395,8 @@ revoke all on function public.ts_tienda(), public.ts_horarios(date, date), publi
 grant execute on function public.ts_tienda(), public.ts_horarios(date, date), public.ts_agendar(jsonb), public.ts_consulta(text, text),
   public.ts_autorizar(text, text, text, text, text), public.ts_cancelar_cita(text, text, text) to anon, authenticated;
 grant execute on function public.ts_mi_cuenta() to authenticated;
+-- Supabase da permiso a anon por omisión en public; la cuenta del cliente solo con sesión.
+revoke execute on function public.ts_mi_cuenta() from anon;
 
 -- Tiempo real: las herramientas se actualizan solas cuando otra escribe.
 do $$

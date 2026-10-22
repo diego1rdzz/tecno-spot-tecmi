@@ -58,4 +58,9 @@ Las direcciones están en `prototipo/artifacts.json`. `python3 prototipo/build.p
 - Si hay servicio a domicilio: costo y zona.
 - Colores y logotipo: los actuales (azul noche, verde azulado y amarillo “spot”) son provisionales.
 - Nombres del personal (técnicos y mostrador).
-- Proyecto de Supabase y proyectos de Vercel (todavía no existen).
+- Proyectos de Vercel (todavía no existen) y para qué se usará n8n (el usuario dice que ya lo tiene listo, 22/10/2026).
+
+## Supabase
+
+- Proyecto `tecno-spot-tecmi` (ref `rleycbpnymeoqbwywciw`, https://rleycbpnymeoqbwywciw.supabase.co), creado por el usuario el 22/10/2026. `supabase/config.json` tiene su URL y su clave *publishable*; `web/` ya se arma contra él (sin datos de demostración).
+- La conexión de Supabase de Claude sí ve este proyecto. El usuario rechazó que Claude aplicara el esquema con esa conexión: no escribir en su base sin que lo pida. Al 22/10/2026 la base seguía vacía; falta correr `supabase/instalar.sql`.
