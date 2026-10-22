@@ -16,8 +16,10 @@ una) para publicarlas en Vercel. Si existe supabase/config.json
 se conectan a esa base de Supabase y no llevan datos de demostración; si no,
 trabajan en modo local con la demostración.
 
-Con una carpeta como argumento escribe además sistema-tecno-spot.html: las
-tres herramientas en una sola página con su propio enlace (#sitio, #portal,
+Con una carpeta como argumento escribe además las demostraciones para publicar
+en Claude: tecno-spot-sitio.html, tecno-spot-consola.html y
+tecno-spot-portal.html (cada herramienta por separado, con sus propios datos
+de demostración) y sistema-tecno-spot.html (las tres juntas, #sitio, #portal,
 #consola). La plataforma de publicación pone <!doctype>, <head> y <body>.
 """
 import json
@@ -102,8 +104,21 @@ for nombre, (titulo, _) in sueltos.items():
     (carpeta / "index.html").write_text(documento(fragmento(titulo, [nombre], enlaces, nombre, BASE if supa else DEMO, supa=supa)), encoding="utf-8")
     print("escrito", carpeta / "index.html", "(Supabase)" if supa else "(modo local con demostración: falta supabase/config.json)")
 
+# Demostraciones publicadas en Claude: cada herramienta en su propia página, y las tres juntas.
+# Las direcciones ya publicadas (prototipo/artifacts.json) sirven para enlazarlas entre sí.
 if len(sys.argv) > 1:
-    destino = pathlib.Path(sys.argv[1]) / "sistema-tecno-spot.html"
+    salida = pathlib.Path(sys.argv[1])
+    publicadas = json.loads(leer("artifacts.json")) if (AQUI / "artifacts.json").exists() else {}
+    separadas = {"sitio": "Sitio Tecno-Spot", "consola": "Consola Tecno-Spot", "portal": "Portal Tecno-Spot"}
+    for nombre, titulo in separadas.items():
+        enlaces = {"inicio": "#"}
+        # El sitio y el portal se enlazan entre sí; la consola no, porque el visor no pasa ?folio= a la página.
+        if nombre in ("sitio", "portal"):
+            enlaces.update({k: v for k, v in publicadas.items() if k in ("sitio", "portal") and k != nombre})
+        destino = salida / f"tecno-spot-{nombre}.html"
+        destino.write_text(fragmento(titulo, [nombre], enlaces, nombre, DEMO, artifact=True), encoding="utf-8")
+        print("escrito", destino)
+    destino = salida / "sistema-tecno-spot.html"
     destino.write_text(fragmento("Sistema Tecno-Spot", ["sitio", "portal", "consola"],
                                  {"inicio": "#inicio", "portal": "#portal", "sitio": "#sitio"}, "inicio", DEMO, portada=True, artifact=True),
                        encoding="utf-8")

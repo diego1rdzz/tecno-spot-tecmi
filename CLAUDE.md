@@ -38,7 +38,16 @@ Léelo completo antes de trabajar. Resume lo acordado y lo construido para retom
 - `prototipo/build.py` arma `prototipo/dist/{sitio,portal,consola}.html` y `web/{sitio,portal,consola}/index.html`; con una carpeta como argumento, `sistema-tecno-spot.html` (las tres en una página con `#sitio`, `#portal`, `#consola`).
 - `supabase/migrations/0001_esquema_y_reglas.sql` + `supabase/instalar.py` → `instalar.sql` (esquema, RLS, funciones `ts_tienda`, `ts_horarios`, `ts_agendar`, `ts_consulta`, `ts_autorizar`, `ts_cancelar_cita`, `ts_mi_cuenta`, ajustes y modelos; sin demo). Probado dos veces seguidas en Postgres 16 local con cada rol: anónimo solo agenda y consulta, técnico no vende, mostrador no ve costos (el costo de un usado lo pone un trigger), cliente solo su cuenta resumida.
 
-Demostración publicada (privada, datos de ejemplo en el navegador de cada quien): https://claude.ai/artifact/EgT4y3M1qPTh478J97j7d6 con `#sitio`, `#consola` y `#portal`. Se arma con `python3 prototipo/build.py <carpeta>` (`sistema-tecno-spot.html`, con `window.TS_ARTIFACT`: sin imprimir ni descargar, porque el visor no lo permite). En vez de `confirm()`/`prompt()` se usa `T.confirmar()` (diálogo dentro de la página).
+## Demostraciones publicadas en Claude (privadas)
+
+Cada herramienta tiene su propia página para modificarla por separado (pedido del usuario, 22/10/2026):
+
+- Sitio: https://claude.ai/artifact/DnCk7TibsiujKAruQbs5Ua
+- Consola: https://claude.ai/artifact/Dedpm8mCCZCQvzEvmYu59x
+- Portal: https://claude.ai/artifact/4AkNYtn5TUQPKrDDwWM3Wg
+- Las tres juntas (`#sitio`, `#consola`, `#portal`): https://claude.ai/artifact/EgT4y3M1qPTh478J97j7d6
+
+Las direcciones están en `prototipo/artifacts.json`. `python3 prototipo/build.py <carpeta>` arma `tecno-spot-{sitio,consola,portal}.html` y `sistema-tecno-spot.html`; para actualizar una, se vuelve a publicar ese archivo con su dirección. Cada página separada guarda sus datos de ejemplo en el navegador de quien la abre, así que lo que se agenda en el sitio separado no aparece en la consola separada; la versión conectada de verdad es la de Vercel con Supabase. Llevan `window.TS_ARTIFACT` (sin imprimir ni descargar, porque el visor no lo permite). En vez de `confirm()`/`prompt()` se usa `T.confirmar()` (diálogo dentro de la página).
 
 ## Pendientes de confirmar con el negocio
 
