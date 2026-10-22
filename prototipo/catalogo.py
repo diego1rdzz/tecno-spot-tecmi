@@ -20,7 +20,7 @@ CATEGORIAS = ["fundas", "micas", "privacidad", "hidrogel", "cargadores", "bateri
 
 
 def slug(s):
-    s = unicodedata.normalize("NFD", str(s or ""))
+    s = unicodedata.normalize("NFD", str(s or "").replace("+", " plus "))
     s = "".join(c for c in s if not unicodedata.combining(c)).lower()
     out, guion = [], False
     for c in s:

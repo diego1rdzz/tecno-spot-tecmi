@@ -1,0 +1,5 @@
+{
+  "buildCommand": "echo sitio listo",
+  "outputDirectory": "web/sitio",
+  "cleanUrls": true
+}

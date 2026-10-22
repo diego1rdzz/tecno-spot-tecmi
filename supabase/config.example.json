@@ -1,0 +1,9 @@
+{
+  "url": "https://TU-PROYECTO.supabase.co",
+  "key": "sb_publishable_…",
+  "enlaces": {
+    "sitio": "https://tecno-spot.vercel.app",
+    "portal": "https://tecno-spot-cuenta.vercel.app",
+    "consola": "https://tecno-spot-consola.vercel.app"
+  }
+}

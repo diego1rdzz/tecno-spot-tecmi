@@ -94,7 +94,7 @@ const aMin = hm => { const p = String(hm || '0:0').split(':').map(Number); retur
 const deMin = m => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
 const digitos = t => String(t || '').replace(/\D/g, '').slice(-10);
 const telTxt = t => { const d = digitos(t); return d.length === 10 ? d.slice(0, 2) + ' ' + d.slice(2, 6) + ' ' + d.slice(6) : (t || ''); };
-const slug = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const slug = s => String(s || '').replace(/\+/g, ' plus ').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 function uid(p){ return p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 const LETRAS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 function nuevoFolio(pref){ const d = new Date(); let r = ''; for (let i = 0; i < 4; i++) r += LETRAS[Math.floor(Math.random() * LETRAS.length)]; return pref + '-' + String(d.getFullYear()).slice(2) + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + r; }
@@ -546,7 +546,8 @@ function aceptarCompra(id, d){
   if (!c.equipo.imei) return 'Captura el IMEI del equipo.';
   const eqId = uid('eq');
   put('equipos', eqId, { marca:c.equipo.marca, modelo:c.equipo.modelo, modeloId:c.equipo.modeloId, capacidad:c.equipo.capacidad, color:c.equipo.color, condicion:'seminuevo', bateria:c.equipo.bateria || null, imei:c.equipo.imei, precio:null, estado:'reacondicionar', origen:c.tipo === 'toma' ? 'Toma a cuenta' : 'Compra a cliente', compraId:id, alta:hoyISO() });
-  put('costos', eqId, { costo:+d.precio });
+  /* Con Supabase, mostrador no puede escribir costos: la base los registra al aceptar la compra. */
+  if (verCostos() || Store.mode !== 'supabase') put('costos', eqId, { costo:+d.precio });
   c.estado = 'aceptada'; c.precio = +d.precio; c.equipoId = eqId; c.cerrada = hoyISO();
   if (c.tipo === 'compra') c.pago = { fecha:hoyISO(), hora:ahoraHM(), forma:d.forma || 'efectivo', monto:+d.precio, por:quien() };
   put('compras', id, c);
